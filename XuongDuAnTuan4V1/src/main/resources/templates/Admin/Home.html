@@ -1,0 +1,131 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" th:herf="@{/css/Bootstrap.min.css}">
+</head>
+<body>
+<div class="content_home">
+    <nav class="sidebar">
+        <img src="../../image/logo_xuong.png" class="image_logo">
+        <ul class="sidebar-menu">
+            <li><img src="../../image/quanLy.png" class="icon"><a th:href="@{/admin/boMon}" target="content_nhanVien">Bộ môn</a></li>
+            <li><img src="../../image/quanLy.png" class="icon"><a th:href="@{/hien-thi-co-so}" target="content_nhanVien">Cơ sở</a></li>
+            <li><img src="../../image/quanLyNhanVien.png" class="icon"><a th:href="@{/danhSachNhanVien}" target="content_nhanVien">Nhân viên</a></li>
+            <li><img src="../../image/quanLySinhVien.png" class="icon"><a th:href="@{/hienThiSinhVien}" target="content_nhanVien">Sinh viên</a></li>
+            <li><img src="../../image/quanLyTheLoai.png" class="icon"><a th:href="@{/the_loai}" target="content_nhanVien">Thể loại</a></li>
+            <li><img src="../../image/quanLyDuAn.png" class="icon"><a th:href="@{/admin/du-an}" target="content_nhanVien">Dự án</a></li>
+            <li><img src="../../image/quanLy.png" class="icon"><a th:href="@{/hienThiChucVu}" target="content_nhanVien">Chức vụ</a></li>
+            <li><img src="../../image/thongKe.png" class="icon"><a th:href="@{/statistics}" target="content_nhanVien">Thống kê</a></li>
+        </ul>
+    </nav>
+    <div class="content">
+        <header>
+            <div class="user-info">
+                <img th:src="${session.avatar}" alt="Avatar">
+                <div class="info">
+                    <div class="name" th:text="${session.tenDangNhap}">Tên người dùng</div>
+                    <div class="email" th:text="${session.email}">Email</div>
+                </div>
+            </div>
+        </header>
+        <iframe src="/admin/boMon"
+                id="content-frame"
+                name="content_nhanVien"
+                style="width:100%; height: 95%; border:none;"
+                frameborder="0">
+        </iframe>
+    </div>
+</div>
+</body>
+</html>
+<style>
+    *{
+        padding: 0px;
+        margin: 0px;
+        box-sizing: border-box;
+    }
+    .content_home{
+        height: 1300px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-content: center;
+    }
+    header{
+        height: 5%;
+        width: 100%;
+    }
+    .content{
+        height: 100%;
+        width: 84%;
+    }
+    .sidebar {
+        width: 220px;
+        background: #fff;
+        border-right: 1px solid #eee;
+        height: 100vh;
+        padding-top: 30px;
+    }
+    .image_logo {
+        width: 80%;
+        margin: 0 auto 30px auto;
+        display: block;
+    }
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .sidebar-menu li {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .sidebar-menu li:hover {
+        background: #f4f5f7;
+    }
+    .sidebar-menu .icon {
+        width: 28px;
+        height: 28px;
+        margin-right: 12px;
+    }
+    .sidebar-menu a {
+        text-decoration: none;
+        color: #222;
+        font-size: 18px;
+        margin-left: 0;
+    }
+    .image_logo {
+        width: 80%;
+        margin: 0 auto 30px auto;
+        display: block;
+    }
+    .user-info {
+        position: relative;
+        width: 25%;
+        left: 72%;
+        padding: 10px;
+        border: 1px dashed lightgray;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+    }
+    .user-info img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+    .user-info .info {
+        font-size: 14px;
+    }
+    .user-info .info .name {
+        font-weight: bold;
+    }
+</style>

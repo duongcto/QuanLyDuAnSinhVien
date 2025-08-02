@@ -1,0 +1,20 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 199752494814-o13heeibpvc495sk7gi0oh2f83na08ej.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - openid
+              - profile
+              - email
+  thymeleaf:
+    cache: false
+  resources:
+    chain:
+      cache: false
+
+server:
+  port: 8080

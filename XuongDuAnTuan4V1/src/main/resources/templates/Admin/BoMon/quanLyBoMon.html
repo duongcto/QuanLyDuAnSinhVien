@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Bộ môn</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9fa;
+      font-size: 0.875rem;
+    }
+    .container-fluid {
+      padding: 20px;
+    }
+    .card {
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    .card-header {
+      background-color: #fff;
+      border-bottom: 1px solid #dee2e6;
+      padding: 15px 20px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+    .filter-section .form-control,
+    .filter-section .form-select {
+      height: calc(1.5em + 0.75rem + 2px);
+      border-radius: 6px;
+    }
+    .table-responsive {
+      margin-top: 20px;
+    }
+    .table thead th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+    .pagination-controls {
+      display: flex;
+      justify-content: flex-end;
+      padding: 20px 0;
+    }
+    .pagination .page-item .page-link {
+      border-radius: 6px;
+      margin: 0 3px;
+      color: #007bff;
+      border: 1px solid #dee2e6;
+      transition: all 0.3s ease;
+    }
+    .pagination .page-item .page-link:hover {
+      background-color: #e9ecef;
+      border-color: #007bff;
+    }
+    .pagination .page-item.active .page-link {
+      background-color: #007bff;
+      border-color: #007bff;
+      color: white;
+      font-weight: bold;
+    }
+    .pagination .page-item.disabled .page-link {
+      color: #6c757d;
+      background-color: #e9ecef;
+      border-color: #dee2e6;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+      border-radius: 6px;
+      padding: 8px 15px;
+    }
+    .btn-primary:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+    .form-control {
+      font-size: 14px;
+      color: #333;
+    }
+    .status-badge {
+      border-radius: 12px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .status-active {
+      border: 1px solid #28a745;
+      color: #28a745;
+    }
+    .status-inactive {
+      border: 1px solid #dc3545;
+      color: #dc3545;
+    }
+    .status-progress {
+      border: 1px solid #007bff;
+      color: #007bff;
+    }
+    .status-completed {
+      border: 1px solid #6c757d;
+      color: #6c757d;
+    }
+    option select {
+      font-size: 12px;
+    }
+    .form-label {
+      font-weight: bold;
+    }
+    .errors {
+      color: red;
+      font-weight: initial;
+    }
+    .btn-custom-gradient {
+      border: none;
+      transition: all 0.3s ease;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-custom-gradient:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transform: translateY(-1px);
+    }
+    .btn-custom-gradient i {
+      margin-right: 8px;
+      font-size: 1rem;
+    }
+    .btn-export {
+      background-image: linear-gradient(to right, #28a745, #1e7e34);
+    }
+    .btn-export:hover {
+      background-image: linear-gradient(to right, #1e7e34, #28a745);
+    }
+    .btn-import {
+      background-image: linear-gradient(to right, #ffc107, #d39e00);
+      color: #333;
+    }
+    .btn-import:hover {
+      background-image: linear-gradient(to right, #d39e00, #ffc107);
+    }
+    .btn-add {
+      background-image: linear-gradient(to right, #17a2b8, #117a8b);
+    }
+    .btn-add:hover {
+      background-image: linear-gradient(to right, #117a8b, #17a2b8);
+    }
+    .btn-manage-major {
+      background-image: linear-gradient(to right, #52c41a, #389e0d);
+    }
+    .btn-manage-major:hover {
+      background-image: linear-gradient(to right, #389e0d, #52c41a);
+    }
+    .btn-manage-department {
+      background-image: linear-gradient(to right, #ff9800, #e68900);
+    }
+    .btn-manage-department:hover {
+      background-image: linear-gradient(to right, #e68900, #ff9800);
+    }
+    .btn-search-gradient {
+      background-image: linear-gradient(to right, #6c757d, #5a6268);
+      border: none;
+      transition: all 0.3s ease;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-search-gradient:hover {
+      background-image: linear-gradient(to right, #5a6268, #6c7568);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid">
+
+<!--  lọc-->
+  <div class="card filter-section">
+    <div class="card-header">
+      <i class="fas fa-filter me-2"></i> Lọc/Tìm kiếm
+    </div>
+    <div class="card-body">
+      <form class="row g-3 align-items-end" th:action="@{/admin/boMon}" method="get">
+        <div class="col-md-4">
+          <label for="tenBoMon" class="form-label">Tên bộ môn</label>
+          <input type="text" class="form-control" id="tenBoMon" name="tenBoMon"
+                 th:value="${tenBoMon}" placeholder="Tìm kiếm theo tên bộ môn">
+        </div>
+        <div class="col-md-4" style="font-size: 14px">
+          <label for="trangThai" class="form-label">Trạng thái</label>
+          <select style="font-size: 14px" class="form-select" id="trangThai" name="trangThai">
+            <option style="font-size: 14px" value="">Chọn trạng thái</option>
+            <option style="font-size: 14px" value="true" th:selected="${trangThai == 'true'}">Hoạt động</option>
+            <option style="font-size: 14px" value="false" th:selected="${trangThai == 'false'}">Ngừng hoạt động</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <button type="submit" class="btn btn-search-gradient">
+            <i class="fa-brands fa-searchengin"></i> Lọc
+          </button>
+          <a th:href="@{/admin/boMon}" class="btn btn-search-gradient">
+            <i class="fa-solid fa-spinner"></i> Hủy
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <div class="card">
+    <div class="card-header">
+      <i class="fas fa-list-ul me-2"></i> Danh sách bộ môn
+    </div>
+<!--    chức năng-->
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <div class="mb-2 mb-md-0">
+          <p class="mb-0 text-body-secondary">Ngày tạo: <span>01/01/2025</span></p>
+          <p class="mb-0 text-body-secondary">Ngày cập nhật: <span>01/01/2025</span></p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <a type="button" class="btn btn-custom-gradient btn-export" th:href="@{/admin/boMon/export}">
+            <i class="fas fa-file-excel"></i> Xuất Excel
+          </a>
+          <form th:action="@{/admin/boMon/import}" method="post" enctype="multipart/form-data" class="d-inline">
+            <input type="file" name="file" accept=".xlsx,.xls" style="display: none;" id="importFile" onchange="this.form.submit()">
+            <button type="button" class="btn btn-custom-gradient btn-import" onclick="document.getElementById('importFile').click();">
+              <i class="fas fa-upload"></i> Import Template
+            </button>
+          </form>
+          <button type="button" class="btn btn-custom-gradient btn-add" onclick="openPopup('Thêm Bộ môn')">
+            <i class="fas fa-plus-circle"></i> Thêm bộ môn
+          </button>
+          <a type="button" class="btn btn-custom-gradient btn-manage-major" th:href="@{/admin/boMon/chuyen-nganh}">
+            <i class="fas fa-graduation-cap"></i> Quản lý chuyên ngành
+          </a>
+          <a type="button" class="btn btn-custom-gradient btn-manage-department" th:href="@{/admin/boMon/boMonCoSo}">
+            <i class="fas fa-building"></i> Quản lý Bộ môn theo cơ sở
+          </a>
+        </div>
+      </div>
+
+<!--      table chứa dữ liệu-->
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Mã bộ môn</th>
+            <th scope="col">Tên bộ môn</th>
+            <th scope="col">Trưởng bộ môn</th>
+            <th scope="col">Thành viên</th>
+            <th scope="col">Ngày thành lập</th>
+            <th scope="col">Trạng thái</th>
+            <th scope="col">Hành động</th>
+          </tr>
+          </thead>
+          <tbody id="boMonTableBody" th:if="${boMons != null}">
+            <tr th:each="boMons, stat : ${boMons}">
+              <td th:text="${stat.index + 1 + (currentPage != null ? currentPage : 0) * 5}"></td>
+              <td th:text="${boMons.maBoMon}"></td>
+              <td th:text="${boMons.tenBoMon}"></td>
+              <td th:text="${boMons.trungBoMon}"></td>
+              <td th:text="${boMons.soThanhVien}"></td>
+              <td><span class="status-badge status-progress" th:text="${boMons.ngayThanhLap}"></span></td>
+              <td>
+                <span class="status-badge"
+                      th:classappend="${boMons.trangThai} ? 'status-active' : 'status-inactive'"
+                      th:text="${boMons.trangThai ? 'Hoạt động' : 'Ngừng hoạt động'}">
+                </span>
+              </td>
+              <td>
+                <button type="button" th:onclick="|showDetail(${boMons.id})|" class="btn btn-sm btn-info me-1">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button type="button" th:onclick="|confirmDelete(${boMons.id})|" class="btn btn-sm btn-danger btn-delete">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+<!--      phân trang-->
+      <nav aria-label="Pagination" class="pagination-controls mt-4">
+        <ul class="pagination pagination-sm justify-content-end">
+          <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+            <a class="page-link rounded-circle" th:href="@{/admin/boMon(page=0)}" title="Trang đầu">
+              <i class="fas fa-angle-double-left"></i>
+            </a>
+          </li>
+          <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+            <a class="page-link rounded-circle" th:href="@{/admin/boMon(page=${currentPage > 0 ? currentPage - 1 : 0})}" title="Trang trước">
+              <i class="fas fa-angle-left"></i>
+            </a>
+          </li>
+          <li class="page-item active">
+            <span class="page-link rounded-pill px-3 mx-1" th:text="${currentPage + 1}"></span>
+          </li>
+          <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+            <a class="page-link rounded-circle" th:href="@{/admin/boMon(page=${currentPage < totalPages - 1 ? currentPage + 1 : totalPages - 1})}" title="Trang sau">
+              <i class="fas fa-angle-right"></i>
+            </a>
+          </li>
+          <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+            <a class="page-link rounded-circle" th:href="@{/admin/boMon(page=${totalPages - 1})}" title="Trang cuối">
+              <i class="fas fa-angle-double-right"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!--modal thêm/sửa-->
+<div class="modal fade" id="boMonModal" tabindex="-1" aria-labelledby="boMonModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-lg">
+      <div class="modal-header">
+        <h5 class="modal-title" id="boMonModalLabel">Thêm Bộ môn</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="boMonForm" method="post">
+          <input type="hidden" id="popupBoMonId">
+          
+          <!-- Mã bộ môn -->
+          <div class="mb-3">
+            <label class="form-label">Mã bộ môn</label><span style="color: red">*</span>
+            <input type="text" class="form-control" id="popupMaBoMon" placeholder="Nhập mã bộ môn" required>
+            <div class="error-message" id="errorMaBoMon"></div>
+          </div>
+
+          <!-- Tên bộ môn -->
+          <div class="mb-3">
+            <label class="form-label">Tên bộ môn</label><span style="color: red">*</span>
+            <input type="text" class="form-control" id="popupTenBoMon" placeholder="Nhập tên bộ môn" required>
+            <div class="error-message" id="errorTenBoMon"></div>
+          </div>
+
+          <!-- Trưởng bộ môn -->
+          <div class="mb-3">
+            <label class="form-label">Trưởng bộ môn</label><span style="color: red">*</span>
+            <input type="text" class="form-control" id="popupTruongBoMon" placeholder="Nhập tên trưởng bộ môn" required>
+            <div class="error-message" id="errorTruongBoMon"></div>
+          </div>
+
+          <!-- Số thành viên -->
+          <div class="mb-3">
+            <label class="form-label">Số thành viên</label><span style="color: red">*</span>
+            <input type="number" class="form-control" id="popupSoThanhVien" placeholder="Nhập số thành viên" required>
+            <div class="error-message" id="errorSoThanhVien"></div>
+          </div>
+
+          <!-- Ngày thành lập -->
+          <div class="mb-3">
+            <label class="form-label">Ngày thành lập</label><span style="color: red">*</span>
+            <input type="date" class="form-control" id="popupNgayThanhLap" required>
+            <div class="error-message" id="errorNgayThanhLap"></div>
+          </div>
+
+          <!-- Trạng thái -->
+          <div class="mb-3">
+            <label class="form-label">Trạng thái</label><span style="color: red">*</span>
+            <select class="form-select" id="popupTrangThai" required>
+              <option value="true">Hoạt động</option>
+              <option value="false">Ngừng hoạt động</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-dark" onclick="closePopup()">Hủy</button>
+        <button type="button" class="btn btn-secondary" onclick="submitForm()">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- modal thông báo-->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+  <div id="successToast" class="toast align-items-center text-white border-0" role="alert"
+       aria-live="assertive" aria-atomic="true" th:if="${message}"
+       style="background-color: #80dc80;">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${message}"></span>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+              aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<!--lỗi file-->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+  <div style="background-color: #f8d7da; color: #721c24;" id="errorToast" class="toast align-items-center border-0"
+       role="alert" aria-live="assertive" aria-atomic="true" th:if="${errorMessage}">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}">Lỗi khi nhập file!</span>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+              aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let selectedBoMonId = null;
+
+    function openPopup(title, data = null) {
+        document.getElementById("boMonModalLabel").innerText = title;
+        selectedBoMonId = data?.id || null;
+
+        document.getElementById("popupBoMonId").value = selectedBoMonId || "";
+        document.getElementById("popupMaBoMon").value = data?.maBoMon || "";
+        document.getElementById("popupTenBoMon").value = data?.tenBoMon || "";
+        document.getElementById("popupTruongBoMon").value = data?.trungBoMon || "";
+        document.getElementById("popupSoThanhVien").value = data?.soThanhVien || "";
+        document.getElementById("popupNgayThanhLap").value = data?.ngayThanhLap || "";
+        document.getElementById("popupTrangThai").value = data?.trangThai ? "true" : "false";
+
+        const modal = new bootstrap.Modal(document.getElementById('boMonModal'));
+        modal.show();
+    }
+
+    function closePopup() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('boMonModal'));
+        modal.hide();
+        document.getElementById("popupBoMonId").value = "";
+        selectedBoMonId = null;
+    }
+
+    function submitForm() {
+        document.querySelectorAll('.error-message').forEach(el => el.innerText = "");
+
+        let isValid = true;
+
+        const maBoMon = document.getElementById("popupMaBoMon").value.trim();
+        const tenBoMon = document.getElementById("popupTenBoMon").value.trim();
+        const trungBoMon = document.getElementById("popupTruongBoMon").value.trim();
+        const soThanhVien = document.getElementById("popupSoThanhVien").value.trim();
+        const ngayThanhLap = document.getElementById("popupNgayThanhLap").value;
+
+        if (!maBoMon) {
+            document.getElementById("errorMaBoMon").innerText = "Mã bộ môn không được để trống";
+            isValid = false;
+        }
+
+        if (!tenBoMon) {
+            document.getElementById("errorTenBoMon").innerText = "Tên bộ môn không được để trống";
+            isValid = false;
+        }
+
+        if (!trungBoMon) {
+            document.getElementById("errorTruongBoMon").innerText = "Trưởng bộ môn không được để trống";
+            isValid = false;
+        }
+
+        if (!soThanhVien || isNaN(soThanhVien) || parseInt(soThanhVien) < 0) {
+            document.getElementById("errorSoThanhVien").innerText = "Phải là số hợp lệ lớn hơn 0";
+            isValid = false;
+        }
+
+        if (!ngayThanhLap) {
+            document.getElementById("errorNgayThanhLap").innerText = "Ngày không được để trống";
+            isValid = false;
+        }
+
+        if (!isValid) return;
+
+        const id = document.getElementById("popupBoMonId").value;
+
+        const data = {
+            maBoMon,
+            tenBoMon,
+            trungBoMon,
+            soThanhVien: parseInt(soThanhVien),
+            ngayThanhLap,
+            trangThai: document.getElementById("popupTrangThai").value === "true"
+        };
+
+        const url = id ? `/admin/boMon/updateBoMon/${id}` : `/admin/boMon/addBoMon`;
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Gửi dữ liệu thất bại!");
+                return res.text();
+            })
+            .then(msg => {
+                alert(msg);
+                location.reload();
+            })
+            .catch(err => alert("Lỗi: " + err.message));
+    }
+
+    function confirmDelete(id) {
+        if (confirm("Bạn có chắc chắn muốn xóa bộ môn này không?")) {
+            fetch(`/admin/boMon/deleteBoMon/${id}`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Xóa không thành công!");
+                    return res.text();
+                })
+                .then(msg => {
+                    alert(msg);
+                    location.reload();
+                })
+                .catch(err => alert("Lỗi: " + err.message));
+        }
+    }
+
+    function showDetail(id) {
+        fetch(`/admin/boMon/detailBoMon/${id}`)
+            .then(res => res.json())
+            .then(data => openPopup("Chi tiết Bộ môn", data))
+            .catch(err => alert("Lỗi khi lấy chi tiết: " + err.message));
+    }
+
+    // Search functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('tenBoMon');
+        const tableBody = document.getElementById('boMonTableBody');
+
+        if (!searchInput || !tableBody) return;
+
+        let debounceTimeout;
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimeout);
+
+            debounceTimeout = setTimeout(() => {
+                const keyword = searchInput.value.trim();
+
+                if (!keyword) {
+                    window.location.href = '/admin/boMon';
+                    return;
+                }
+
+                fetch(`/admin/boMon/searchBoMon?keyword=${encodeURIComponent(keyword)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        tableBody.innerHTML = '';
+
+                        if (data.length === 0) {
+                            tableBody.innerHTML = `<tr><td colspan="8" class="text-center">Không tìm thấy kết quả</td></tr>`;
+                            return;
+                        }
+
+                        data.forEach((boMon, index) => {
+                            const tr = document.createElement('tr');
+
+                            tr.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${boMon.maBoMon}</td>
+                            <td>${boMon.tenBoMon}</td>
+                            <td>${boMon.trungBoMon}</td>
+                            <td>${boMon.soThanhVien}</td>
+                            <td><span class="status-badge status-progress">${boMon.ngayThanhLap}</span></td>
+                            <td>
+                                <span class="status-badge ${boMon.trangThai ? 'status-active' : 'status-inactive'}">
+                                    ${boMon.trangThai ? 'Hoạt động' : 'Ngừng hoạt động'}
+                                </span>
+                            </td>
+                            <td>
+                                <button type="button" onclick="showDetail(${boMon.id})" class="btn btn-sm btn-info me-1">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" onclick="confirmDelete(${boMon.id})" class="btn btn-sm btn-danger btn-delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        `;
+
+                            tableBody.appendChild(tr);
+                        });
+                    })
+                    .catch(err => {
+                        console.error('Lỗi khi tìm kiếm:', err);
+                    });
+            }, 300);
+        });
+
+        // Filter by status
+        const filterTrangThai = document.getElementById('trangThai');
+        const tableRows = document.querySelectorAll('table tbody tr');
+
+        filterTrangThai.addEventListener('change', () => {
+            const selectedValue = filterTrangThai.value;
+
+            tableRows.forEach(row => {
+                const trangThaiCell = row.cells[6].innerText.trim();
+                if (selectedValue === "") {
+                    row.style.display = '';
+                } else if ((selectedValue === "true" && trangThaiCell === "Hoạt động") ||
+                    (selectedValue === "false" && trangThaiCell === "Ngừng hoạt động")) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Show toasts
+        const errorToastEl = document.getElementById('errorToast');
+        if (errorToastEl) {
+            const toast = new bootstrap.Toast(errorToastEl, { delay: 3000 });
+            toast.show();
+        }
+
+        const successToastEl = document.getElementById('successToast');
+        if (successToastEl) {
+            const toast = new bootstrap.Toast(successToastEl, { delay: 2000 });
+            toast.show();
+        }
+    });
+</script>
+
+</body>
+</html>

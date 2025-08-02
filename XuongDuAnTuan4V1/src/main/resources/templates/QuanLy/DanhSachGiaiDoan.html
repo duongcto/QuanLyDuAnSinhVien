@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao diện Quản lý dự án</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/icofont/1.0.1/css/icofont.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        /* --- General Styles --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f5f7;
+            margin: 0;
+            padding: 20px;
+            color: #172b4d;
+        }
+
+        /* --- Main Container --- */
+        .project-container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        /* --- Header Section --- */
+        .project-header {
+            margin-bottom: 24px;
+        }
+
+        .project-title h1 {
+            font-size: 24px;
+            margin: 0 0 4px 0;
+            font-weight: 600;
+        }
+
+        .project-status {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* --- Actions Bar --- */
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 12px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin-top: 16px;
+        }
+
+        .actions-bar .search-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .actions-bar .search-group input {
+            border: 1px solid #dfe1e6;
+            border-radius: 3px;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .actions-bar .search-group label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .actions-bar .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* --- General Button Styles --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 3px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-light {
+            background-color: #f4f5f7;
+            border-color: #dfe1e6;
+            color: #42526e;
+        }
+
+        .btn-light:hover {
+            background-color: #e9ecef;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+        }
+
+        .btn-secondary {
+            background-color: #e9f2ff;
+            color: #007bff;
+            border-color: #e9f2ff;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d1e3ff;
+        }
+
+
+        /* --- Card Styles --- */
+        .card {
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #dfe1e6;
+        }
+
+        .card-header .toggle-icon {
+            cursor: pointer;
+            margin-right: 8px;
+            color: #5e6c84;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .card-header .date-range {
+            margin-left: 16px;
+            font-size: 14px;
+            color: #5e6c84;
+        }
+
+        .card-header .header-buttons {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+        }
+
+        .card-body {
+            padding: 16px;
+            min-height: 150px;
+        }
+
+        .card-body.empty {
+            /* For the empty state as in the image */
+            background-color: #f9f9f9;
+        }
+
+        .card-footer {
+            padding: 12px 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .btn-add {
+            background-color: #f4f5f7;
+            color: #42526e;
+        }
+        .btn-add:hover {
+            background-color: #dfe1e6;
+        }
+
+        /* --- Task Input Area --- */
+        .task-input-area {
+            border: 2px dashed #dfe1e6;
+            border-radius: 5px;
+            min-height: 80px;
+            padding: 10px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Đẩy các phần tử ra xa nhau */
+            background-color: #ffffff;
+            border: 1px solid #dfe1e6;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            font-size: 14px;
+        }
+
+        .task-left-section {
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Khoảng cách giữa checkbox và tên */
+        }
+
+        .task-name {
+            font-weight: 500;
+            color: #172b4d;
+        }
+
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 20px; /* Khoảng cách giữa ngày và ưu tiên */
+        }
+
+        .task-date {
+            color: #5e6c84;
+        }
+
+        .task-priority {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: capitalize; /* Chữ cái đầu viết hoa */
+        }
+
+        .priority-thap {
+            background-color: #fbf0dc; /* Màu vàng nhạt */
+            color: #c98b00; /* Màu vàng đậm */
+        }
+
+        /* Thêm các class ưu tiên khác nếu có:
+        .priority-trung-binh { background-color: #e3fcef; color: #006644; }
+        .priority-cao { background-color: #ffebe6; color: #bf2600; }
+        */
+
+        .task-voting {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #5e6c84;
+        }
+
+        .task-voting span {
+            font-weight: 500;
+        }
+        .deleteGiaiDoan{
+            padding-left: 10px;
+            cursor: pointer;
+        }
+
+        .inputContainer input.tenGiaoViec {
+            width: 250px;           /* Chiều rộng cố định */
+            padding: 8px 12px;      /* Đệm trong để dễ nhập liệu */
+            font-size: 16px;        /* Cỡ chữ vừa phải */
+            border: 1.5px solid #ccc; /* Viền màu xám nhạt */
+            border-radius: 4px;     /* Bo góc nhẹ */
+            outline: none;          /* Bỏ viền mặc định khi focus */
+            transition: border-color 0.3s ease;
+        }
+
+        .inputContainer input.tenGiaoViec:focus {
+            border-color: #007bff;  /* Viền xanh khi focus */
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .inputContainer .btnLuuGiaiDoan {
+            margin-left: 10px;
+            padding: 8px 16px;
+            font-size: 16px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .inputContainer .btnLuuGiaiDoan:hover {
+            background-color: #0056b3;
+        }
+
+        .inputCongViec input.tenDanhSachCongViec {
+            width: 250px;               /* Chiều rộng cố định */
+            padding: 8px 12px;          /* Đệm trong để dễ nhập liệu */
+            font-size: 16px;            /* Cỡ chữ vừa phải */
+            border: 1.5px solid #ccc;   /* Viền màu xám nhạt */
+            border-radius: 4px;         /* Bo góc nhẹ */
+            outline: none;              /* Bỏ viền mặc định khi focus */
+            transition: border-color 0.3s ease;
+        }
+
+        .inputCongViec input.tenDanhSachCongViec:focus {
+            border-color: #007bff;      /* Viền xanh khi focus */
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .inputCongViec .btnLuuCongViec {
+            margin-left: 10px;
+            padding: 8px 16px;
+            font-size: 16px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .inputCongViec .btnLuuCongViec:hover {
+            background-color: #0056b3;
+        }
+
+        /* Form chi tiết công việc - modal chính */
+        .formCongViecChiTiet {
+            display: flex;
+            width: 820px;
+            gap: 20px;
+            padding: 20px;
+            background: #f4f5f7;
+            font-family: sans-serif;
+
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .main-content, .sidebar {
+            background: #fff; padding: 20px; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .main-content { flex-grow: 1; }
+        .sidebar { width: 250px; }
+        h3 { margin-top: 0; color: #5e6c84; display: flex; align-items: center; gap: 8px; }
+        button { border: 1px dashed #ccc; background: #f4f5f7; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-right: 5px; }
+        .priority-group { display: flex; align-items: center; gap: 5px; }
+        .priority-group .current-priority { background: #dfe1e6; padding: 5px 10px; border-radius: 3px; }
+        textarea { width: 100%; min-height: 60px; border: 1px solid #ccc; border-radius: 3px; padding: 8px; box-sizing: border-box; }
+        .progress-bar-container { background: #dfe1e6; border-radius: 3px; height: 8px; margin-bottom: 10px; overflow: hidden; }
+        .progress-bar { background: #0079bf; height: 100%; width: 0; }
+        .add-button { background: #0079bf; color: #fff; border: none; padding: 8px 15px; border-radius: 3px; cursor: pointer; }
+        .add-button:hover { background: #0052cc; }
+        .sidebar-item { display: flex; align-items: center; padding: 8px 12px; margin-bottom: 8px; background: #f4f5f7; border-radius: 3px; cursor: pointer; }
+        .sidebar-item:hover { background: #e1e4e8; }
+        .comment-box { display: flex; gap: 10px; align-items: flex-start; }
+        .avatar { width: 32px; height: 32px; background: #ccc; border-radius: 50%; }
+        .comment-input { flex-grow: 1; position: relative; }
+        .send-icon { position: absolute; right: 10px; bottom: 10px; cursor: pointer; color: #5e6c84; }
+        .toggle-details { color: #5e6c84; cursor: pointer; font-size: 0.9em; }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #5e6c84; }
+        .close-btn { cursor: pointer; font-size: 1.2em; }
+
+
+        .priority-thap {
+            background-color: #577590;
+            color: #fff;
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+        .fromKieuCV {
+            font-family: Arial, sans-serif;
+            background-color: rgba(0, 0, 0, 0.3); /* làm tối nền */
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex; /* thêm dòng này để bật flexbox */
+            justify-content: center;
+            align-items: center;
+        }
+        .fromNhan {
+            font-family: Arial, sans-serif;
+            background-color: rgba(0, 0, 0, 0.3); /* làm tối nền */
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex; /* thêm dòng này để bật flexbox */
+            justify-content: center;
+            align-items: center;
+        }
+        .label-modal-overlay {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+        .label-form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .label-form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .label-form-header h3 {
+            margin: 0;
+            font-size: 1.15em;
+            color: #333;
+        }
+
+        .label-form-header .close-button {
+            background: none;
+            border: none;
+            font-size: 1.5em; /* Larger X for closer look */
+            cursor: pointer;
+            color: #888;
+            line-height: 1; /* Remove extra space above/below X */
+            padding: 0; /* Remove default button padding */
+        }
+
+        .label-search-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            margin-bottom: 20px;
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        .label-search-input::placeholder {
+            color: #aaa;
+        }
+
+        .add-label-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #36454F; /* Dark background, similar to image */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px; /* Space between icon and text */
+            transition: background-color 0.2s ease;
+        }
+
+        .add-label-button:hover {
+            background-color: #2F3C47; /* Slightly darker on hover */
+        }
+
+        .add-label-button .icon {
+            font-size: 1.2em; /* Adjust icon size */
+        }
+
+        /* Ẩn modal toàn bộ ban đầu */
+        .fromNgayHan {
+            display: none; /* ✅ Bỏ comment dòng này */
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.4); /* mờ nền */
+            z-index: 9998;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Modal chính vẫn giữ styling hiện tại */
+        .modal-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 9999;
+            width: 360px;
+            padding: 20px 24px;
+            box-sizing: border-box;
+        }
+
+        /* --- Modal Header --- */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem; /* 20px */
+            font-weight: 600;
+            color: #172b4d;
+            margin: 0;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem; /* 24px */
+            color: #6b778c;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        /* --- Form Group --- */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem; /* 14px */
+            font-weight: 600;
+            color: #5e6c84;
+            margin-bottom: 6px;
+        }
+
+        /* --- Input & Select Fields --- */
+        .input-field {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 0.9375rem; /* 15px */
+            border: 2px solid #dfe1e6;
+            border-radius: 4px;
+            background-color: #fafbfc;
+            box-sizing: border-box;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .input-field:focus{
+            outline: none;
+            border-color: #4c9aff;
+            background-color: #ffffff;
+        }
+
+
+        /* --- Specific field styling --- */
+        .date-input-wrapper {
+            position: relative;
+        }
+
+        .date-input-wrapper::after {
+            content: '📅';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #5e6c84;
+            pointer-events: none; /* Allows clicking through to the input */
+        }
+
+        .input-field::placeholder {
+            color: #a5adba;
+        }
+
+        /* --- Action Buttons --- */
+        .button-group {
+            display: flex;
+            gap: 8px; /* Space between buttons */
+        }
+
+        .btn {
+            padding: 10px;
+            font-size: 0.9375rem; /* 15px */
+            font-weight: 500;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .btn-save {
+            background-color: #2c3e50; /* Dark blue/charcoal */
+            color: #ffffff;
+        }
+
+        .btn-save:hover {
+            background-color: #34495e;
+        }
+
+        /* --- Hộp chứa modal --- */
+        .upload-modal {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            width: 380px;
+            padding: 20px 24px;
+            box-sizing: border-box;
+        }
+
+
+
+        /* --- Phần đầu của modal --- */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.125rem; /* 18px */
+            font-weight: 600;
+            color: #172b4d;
+            margin: 0;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem; /* 24px */
+            color: #6b778c;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        /* --- Form --- */
+        .fromAnh .form-group {
+            margin-bottom: 16px;
+        }
+
+        .fromAnh label {
+            /*display: none;*/
+            font-size: 0.875rem; /* 14px */
+            font-weight: 600;
+            color: #5e6c84;
+            margin-bottom: 8px;
+        }
+        .submit-button:hover {
+            background-color: #34495e;
+        }
+
+        /* --- Hộp chứa modal --- */
+        .fromAnh {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .upload-modal {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            width: 380px;
+            padding: 20px 24px;
+            box-sizing: border-box;
+        }
+
+        /* --- Phần đầu của modal --- */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.125rem; /* 18px */
+            font-weight: 600;
+            color: #172b4d;
+            margin: 0;
+        }
+
+        .close-buttonAnh {
+            background: none;
+            border: none;
+            font-size: 1.5rem; /* 24px */
+            color: #6b778c;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        /* --- Form --- */
+        .fromAnh .form-group {
+            margin-bottom: 16px;
+        }
+        .submit-button {
+            width: 100%;
+            padding: 12px;
+            font-size: 0.9375rem; /* 15px */
+            font-weight: 500;
+            color: #ffffff;
+            background-color: #2c3e50; /* Màu xanh đậm/than */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .submit-button:hover {
+            background-color: #34495e;
+        }
+
+        /*form link dinh kem*/
+        .formLink {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        /* --- Hộp chứa modal --- */
+        .modal-containerLink {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+            width: 420px;
+            padding: 24px;
+            box-sizing: border-box;
+        }
+
+        /* --- Phần đầu của modal --- */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem; /* 20px */
+            font-weight: 600;
+            color: #172b4d;
+            margin: 0;
+        }
+
+        .close-buttonLink {
+            background: none;
+            border: none;
+            font-size: 1.6rem; /* 26px */
+            color: #6b778c;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        /* --- Form --- */
+        .form-groupLink {
+            margin-bottom: 20px;
+        }
+
+        .form-groupLink label {
+            display: block;
+            font-size: 0.875rem; /* 14px */
+            font-weight: 600;
+            color: #5e6c84;
+            margin-bottom: 8px;
+        }
+
+        .text-inputLink {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 0.9375rem; /* 15px */
+            border: 2px solid #dfe1e6;
+            border-radius: 4px;
+            background-color: #fafbfc;
+            box-sizing: border-box;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .text-inputLink::placeholder {
+            color: #a5adba;
+        }
+
+        .text-inputLink:focus {
+            outline: none;
+            border-color: #4c9aff;
+            background-color: #ffffff;
+        }
+
+        /* --- Nhóm nút bấm --- */
+        .button-groupLink {
+            display: flex;
+            justify-content: flex-end; /* Căn các nút về bên phải */
+            gap: 8px; /* Khoảng cách giữa các nút */
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 9px 16px;
+            font-size: 0.9375rem; /* 15px */
+            font-weight: 500;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        .btn-primaryLink {
+            background-color: #2c3e50; /* Màu nền chính */
+            color: #ffffff;
+        }
+
+        .btn-primaryLink:hover {
+            background-color: #34495e;
+        }
+
+        /*kéo thả*/
+        .sortable-ghost {
+            opacity: 0.4;
+        }
+
+        .sortable-drag {
+            background-color: #f0f8ff;
+            border: 1px dashed #1890ff;
+        }
+
+        .dropdown-container {
+            position: relative; /* Đây là dòng quan trọng nhất! */
+            display: inline-block; /* Giúp container chỉ rộng bằng nút bấm */
+        }
+
+        /* Style cho menu thả xuống */
+        .dropdown-content {
+            display: none; /* Mặc định ẩn */
+            position: absolute;
+            top: 100%; /* Hiển thị ngay bên dưới button (của .dropdown-container) */
+            left: 0;
+            background-color: #ffffff;
+            min-width: 220px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.15);
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            z-index: 10; /* Tăng z-index để chắc chắn nó nằm trên các phần tử khác */
+            margin-top: 5px;
+            padding: 8px 0;
+        }
+
+        /* Các mục trong menu */
+        .dropdown-content a {
+            color: #212529;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 15px;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        /* Class 'show' này sẽ được JS thêm vào để hiện menu */
+        .show {
+            display: block;
+        }
+
+        .modal-overlay {
+            display: none; /* Mặc định ẩn */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Màu đen mờ */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        /* Class 'show' để JS hiển thị modal */
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        /* Nội dung chính của Modal */
+        .modal-content {
+            background-color: #ffffff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 480px; /* Độ rộng của modal */
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Phần Header: Tiêu đề và nút đóng */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #888;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .close-button:hover {
+            color: #000;
+        }
+
+        /* Phần Body: Form */
+        .modal-body .form-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-body label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        /* Wrapper cho input/select để chứa icon */
+        .input-wrapper {
+            position: relative;
+        }
+
+        /* Style chung cho input và select */
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 15px;
+            border: 1px solid #dcdcdc;
+            border-radius: 6px;
+            box-sizing: border-box; /* Quan trọng để padding không làm tăng width */
+            background-color: #fff;
+            -webkit-appearance: none; /* Xóa style mặc định của trình duyệt */
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        /* Style cho các icon bên trong input */
+        .input-wrapper .icon {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            color: #888;
+            pointer-events: none; /* Để có thể click xuyên qua icon */
+        }
+
+        .input-wrapper .icon svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Cần padding-right để chữ không bị icon đè lên */
+        .input-wrapper input, .input-wrapper select {
+            padding-right: 40px;
+        }
+
+        /* Phần Footer: Các nút bấm */
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px; /* Khoảng cách giữa các nút */
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 6px;
+            border: 1px solid #dcdcdc;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .btn-secondary {
+            background-color: #fff;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background-color: #f1f1f1;
+        }
+
+        .btn-primary {
+            background-color: #e7f1ff; /* Nền xanh dương nhạt */
+            color: #007bff; /* Chữ xanh dương đậm */
+            border-color: #a9cfff; /* Viền xanh nhạt hơn */
+        }
+        .btn-primary:hover {
+            background-color: #dbeaff;
+            border-color: #87baff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="project-container">
+    <header class="project-header">
+        <div class="project-title">
+            <h1 th:text="'Tên Dự Án: ' + ${tenDuAn}">Tên Dự Án</h1>
+            <span class="project-status"
+                  th:classappend="${trangThaiDuAn} ? 'status-inprogress' : 'status-completed'"
+                  th:text="${trangThaiDuAn} ? 'Đang diễn ra' : 'Đã kết thúc'">
+                Trạng thái
+            </span>
+        </div>
+        <div class="actions-bar">
+            <div class="search-group" style="display: flex; align-items: center; gap: 10px;">
+                <input type="text" placeholder="Tìm Kiếm">
+                <label>Thành viên :</label>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <span th:each="tv : ${thanhVienThamGiaDuAn}"
+                          style="display: inline-block; width: 32px; height: 32px; background: #2c2177; color: #fff; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold; font-size: 16px;"
+                          th:title="${tv.idNguoiDung.hoTen}">
+                        <span th:text="${#strings.toUpperCase(tv.idNguoiDung.hoTen.substring(0,1))}">A</span>
+                    </span>
+                </div>
+            </div>
+            <div class="button-group">
+                <div class="dropdown-container">
+                    <button id="pollBtn" class="btn btn-light">
+                        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M17 3H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM3 13V5h14l.001 8H3zm5-5H6v2h2V8zm4 0h-2v2h2V8zm4 0h-2v2h2V8z"></path></svg>
+                        Bình chọn
+                    </button>
+                    <div id="pollDropdown" class="dropdown-content">
+                        <a href="#create" id="openModalBtn">Tạo cuộc bình chọn</a>
+                        <a th:href="@{/hien-thi-chi-tiet-binh-chon}">Chi tiết cuộc bình chọn</a>
+                    </div>
+                </div>
+
+                <button class="btn btn-light">
+                    <svg fill="currentColor" viewBox="0 0 20 20"><path d="M3 5h14v2H3zM3 9h14v2H3zM3 13h14v2H3z"></path></svg>
+                    Sprint hoàn thành
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div th:each="gd : ${dsGiaiDoan}">
+            <section class="card">
+                <div class="card-header">
+                    <span class="toggle-icon">&gt;</span>
+                    <h3 th:text="${gd.tenGiaiDoan}">Tên giai đoạn</h3>
+                    <span class="date-range"
+                          th:text="${gd.ngayBatDau} + ' - ' + ${gd.ngayKetThuc}">
+                        Ngày bắt đầu - Ngày kết thúc
+                    </span>
+                    <div class="deleteGiaiDoan">
+                        <a th:href="@{/deleteGiaiDoan/{id}(id=${gd.id})}"
+                           onclick="return confirm('Bạn có chắc muốn xóa giai đoạn này không?')"
+                           class="deleteGiaiDoan">
+                            <i class="bi bi-trash3"></i>
+                        </a>
+                    </div>
+                    <div class="header-buttons">
+                        <button class="btn btn-primary"
+                                th:if="${gd.trangThai}" disabled
+                        >
+                            Hoàn thành
+                        </button>
+                        <button class="btn btn-secondary">Chi tiết</button>
+                    </div>
+                </div>
+                <div class="card-body empty">
+                    <div class="task-input-area" th:attr="data-gd-id=${gd.id}" >
+                        <th:block th:if="${dsCongViecTheoDuAn != null and #maps.containsKey(dsCongViecTheoDuAn, gd.id)}">
+                            <div th:each="cv : ${dsCongViecTheoDuAn[gd.id]}" class="task-item" th:attr="data-id=${cv.id}">
+
+                                <div class="task-left-section">
+                                    <input type="checkbox" class="task-checkbox"/>
+                                    <span class="task-name" th:text="${cv.tenCongViec}">
+                                        Tên công việc
+                                    </span>
+                                </div>
+                                <div class="task-meta">
+                                    <span class="task-date" th:text="${cv.ngayTao}">
+                                        Ngày tạo
+                                    </span>
+                                    <span class="task-priority priority-thap" th:text="${cv.doUuTien}">
+
+                                    </span> <!-- Có thể thêm logic nếu bạn có field độ ưu tiên -->
+                                </div>
+                                <div class="task-voting">
+                                    <span>Bình chọn :</span>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar-fill" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="percentage">0%</span>
+                                </div>
+                                <div>
+                                    <a th:href="@{/detail/{id}(id=${cv.id}, idDuAn=${idDuAn})}" style="text-decoration: none; color: inherit;">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                </div>
+                                <div class="task-actions">
+                                    <a th:href="@{'/deleteCongViec/' + ${cv.id} + '?idDuAn=' + ${idDuAn}}"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa công việc này không?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </th:block>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section class="card">
+            <div class="card-footer">
+                <button class="btn btn-add" id="btnTaoGiaiDoan">
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-9H6v2h3v3h2v-3h3V9h-3V6h-2v3z"></path>
+                    </svg>
+                    Tạo giai đoạn
+                </button>
+            </div>
+            <form th:action="@{/add-giai-doan}" method="post" th:object="${giaoViec}">
+                <div class="inputContainer" style="display:none; margin-top: 10px;">
+                    <input type="text" class="tenGiaoViec" name="tenGiaoViec" placeholder="Nhập tên giai đoạn..." />
+                    <input type="hidden" name="idDuAn" th:value="${idDuAn}" />
+                    <button class="btnLuuGiaiDoan">Lưu</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card">
+            <div class="card-header">
+                <span class="toggle-icon">&gt;</span>
+                <h3>Danh sách công việc</h3>
+            </div>
+
+            <div class="card-body">
+                <div class="task-input-area">
+
+                    <div  class="task-item" th:each="cv : ${dsCongViec}" th:attr="data-id=${cv.id}">
+
+                        <div class="task-left-section">
+                            <input type="checkbox" class="task-checkbox"/>
+                            <span class="task-name" th:text="${cv.tenCongViec}">
+                                Tên công việc
+                            </span>
+                        </div>
+                        <div class="task-meta">
+                            <span class="task-date" th:text="${cv.ngayTao}">
+                                Ngày tạo
+                            </span>
+                            <span class="task-priority priority-thap" th:text="${cv.doUuTien}">
+
+                            </span> <!-- Có thể thêm logic nếu bạn có field độ ưu tiên -->
+                        </div>
+                        <div class="task-voting">
+                            <span>Bình chọn :</span>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: 0%;"></div>
+                            </div>
+                            <span class="percentage">0%</span>
+                        </div>
+                        <div>
+                            <a th:href="@{/detail/{id}(id=${cv.id}, idDuAn=${idDuAn})}" style="text-decoration: none; color: inherit;">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                        </div>
+                        <div class="task-actions">
+                            <a th:href="@{'/deleteCongViec/' + ${cv.id} + '?idDuAn=' + ${idDuAn}}"
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa công việc này không?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+                <button class="btn btn-add" id="btnTaoCongViec">
+                    <svg fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-9H6v2h3v3h2v-3h3V9h-3V6h-2v3z"></path></svg>
+                    Tạo công việc
+                </button>
+                <form th:action="@{/add-cong-viec}" method="post">
+                    <div class="inputCongViec" style="display:none; margin-top: 10px;">
+                        <input type="text" class="tenDanhSachCongViec" name="tenDanhSachCongViec" placeholder="Nhập tên công việc..." />
+                        <input type="hidden" name="idDuAn" th:value="${idDuAn}" />
+                        <button class="btnLuuCongViec" type="submit">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <div id="formChiTiet" data-task-id="[[${congViecChiTiet.id}]]" class="formCongViecChiTiet" th:if="${openModal}" style="display:none;">
+            <div class="main-content" th:object="${congViecChiTiet}">
+                <h1 th:text="*{tenCongViec}">Code giao diện</h1>
+
+                <div style="display:flex; gap:20px; align-items:center; margin-bottom:20px;">
+                    <div>🔖
+                        <button><span class="icon" th:text="*{nhanDan}"></span></button>
+                        <button><span class="icon">+</span> Thành viên</button>
+                    </div>
+                    <div class="priority-group">
+                        <span>Độ ưu tiên:</span>
+                        <form th:action="@{/update-cong-viec-do-uu-tien}" method="post">
+                            <input type="hidden" name="idDuAn" th:value="${idDuAn}" />
+                            <input type="hidden" name="id" th:value="${congViecChiTiet.id}" />
+                            <select name="doUuTien" onchange="this.form.submit()">
+                                <option value="Quan trọng" th:selected="${congViecChiTiet.doUuTien == 'Quan trọng'}">💡 Quan trọng</option>
+                                <option value="Cao" th:selected="${congViecChiTiet.doUuTien == 'Cao'}">🔥 Cao</option>
+                                <option value="Trung bình" th:selected="${congViecChiTiet.doUuTien == 'Trung bình'}">🛡️ Trung bình</option>
+                                <option value="Thấp" th:selected="${congViecChiTiet.doUuTien == 'Thấp'}">⬇️ Thấp</option>
+                            </select>
+                        </form>
+
+                    </div>
+
+                </div>
+                <div>Kiểu công việc: <span th:text="${congViecChiTiet.kieuCv}"></span></div>
+                <div class="form-section">
+                    <form th:action="@{/update-mo-ta}" method="post">
+                        <input type="hidden" name="idDuAn" th:value="${idDuAn}" />
+                        <input type="hidden" name="id" th:value="${congViecChiTiet.id}" />
+
+                        <h3><span class="icon">📄</span> Mô tả</h3>
+                        <textarea id="moTaTextarea"
+                                  placeholder="Thêm mô tả..."
+                                  onfocus="hienNutLuu()"
+                                  name="moTa"
+                                  th:text="${congViecChiTiet.moTa}"></textarea>
+
+                        <button id="nutLuuMoTa" class="add-button" type="submit" style="display: none;">
+                            Lưu
+                        </button>
+                    </form>
+                </div>
+
+
+                <div class="form-section">
+                    <h3><span class="icon">☑️</span> Những việc cần làm</h3>
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                        <span>0%</span>
+                        <div class="progress-bar-container" style="flex-grow:1;">
+                            <div class="progress-bar"></div>
+                        </div>
+                    </div>
+                    <button class="add-button">+ Thêm</button>
+                </div>
+                <div class="form-section">
+                    <div style="text-align: center;">
+                        <img th:src="@{'/uploads/' + ${congViecChiTiet.taiAnh}}" alt="Ảnh sản phẩm" width="300px" style="padding: 10px;"/>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3><span class="icon">💬</span> Bình luận</h3>
+                        <span class="toggle-details">Hiển thị Chi tiết</span>
+                    </div>
+                    <div class="comment-box">
+                        <div class="avatar"></div>
+                        <div class="comment-input">
+                            <textarea placeholder="Viết bình luận... nhập @ để nhắc tới ai đó"></textarea>
+                            <span class="send-icon">➢</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3><span class="icon">⏱️</span> Hoạt động</h3>
+                        <span class="toggle-details">Xem đầy đủ</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h4>Thêm vào thẻ</h4>
+                    <span class="close-btn" onclick="anFormChiTiet()">
+                        ×
+                    </span>
+                </div>
+                <ul>
+                    <li class="sidebar-item"><span class="icon">👤</span> Thành viên</li>
+                    <li class="sidebar-item" id="kieuCVButton"><span class="icon">🏷️</span> Kiểu công việc</li>
+                    <li class="sidebar-item" id="nhanButton"><span class="icon">🔖</span> Nhãn</li>
+                    <li class="sidebar-item" id="ngayHanButton"><span class="icon">📅</span> Ngày hạn</li>
+                    <li class="sidebar-item" id="anhButton"><span class="icon">⤒` </span>  Tải ảnh lên</li>
+                    <li class="sidebar-item" id="linkButton"><span class="icon">🔗</span> Link đính kèm</li>
+                </ul>
+            </div>
+        </div>
+
+        <form th:action="@{/update-KieuCv}" id="fromKieuCV" class="fromKieuCV" th:if="${congViecChiTiet != null}"
+              style="display: none" method="post">
+            <!-- 👇 Lấy lại id từ input ẩn khi form này được mở -->
+            <input type="hidden" name="id" th:value="${congViecChiTiet.id}" />
+            <input type="hidden" name="idDuAn" th:value="${idDuAn}" />
+            <div class="label-modal-overlay">
+                <div class="label-form-container">
+                    <div class="label-form-header">
+                        <h3>Kiểu công việc</h3>
+                        <button type="button" class="close-button" onclick="anFormNhan()">x</button>
+                    </div>
+
+                    <input type="text" name="KieuCv" class="label-search-input" placeholder="Thêm công việc" />
+
+                    <button class="add-label-button" type="submit">
+                        <span class="icon">+</span> Thêm công việc
+                    </button>
+                </div>
+            </div>
+        </form>
+        <form th:action="@{/update-nhan}" id="fromNhan" class="fromNhan" th:if="${congViecChiTiet != null}"
+              style="display: none" method="post">
+            <!-- 👇 Lấy lại id từ input ẩn khi form này được mở -->
+            <input type="hidden" name="id" th:value="${congViecChiTiet.id}" />
+            <input type="hidden" name="idDuAn" th:value="${idDuAn}" />
+            <div class="label-modal-overlay">
+                <div class="label-form-container">
+                    <div class="label-form-header">
+                        <h3>Danh sách nhãn</h3>
+                        <button type="button" class="close-button" onclick="anFormNhan()">x</button>
+                    </div>
+
+                    <input type="text" name="nhanDan" class="label-search-input" placeholder="Tìm kiếm theo tên nhãn" />
+
+                    <button class="add-label-button" type="submit">
+                        <span class="icon">+</span> Thêm nhãn
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <form th:action="@{/update-ngay-han}" id="fromNgayHan" class="fromNgayHan" th:if="${congViecChiTiet != null}" method="post">
+            <input type="hidden" name="id" th:value="${congViecChiTiet.id}" />
+            <input type="hidden" name="idDuAn" th:value="${idDuAn}" />
+            <div class="modal-container" >
+                <div class="modal-header">
+                    <h2>Ngày hạn</h2>
+                    <button type="button" class="close-buttonNgayHan" aria-label="Đóng">x</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="due-date">Thời gian:</label>
+                    <div class="date-input-wrapper">
+                        <input type="date" name="ngayHetHan" id="due-date" class="input-field" placeholder="Select date">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-save">Lưu</button>
+                </div>
+            </div>
+        </form>
+
+
+        <form th:action="@{/update-anh}" class="fromAnh" id="fromAnh" method="post" th:if="${congViecChiTiet != null}" enctype="multipart/form-data">
+            <input type="hidden" name="id" th:value="${congViecChiTiet.id}" />
+            <input type="hidden" name="idDuAn" th:value="${idDuAn}" />
+            <div class="upload-modal">
+                <div class="modal-header">
+                    <h2>Tải ảnh lên</h2>
+                    <button type="button" class="close-buttonAnh" aria-label="Đóng">x</button>
+                </div>
+                <div class="form-group">
+                    <label >
+                        Chọn ảnh
+                    </label>
+                    <input id="file-upload" name="taiAnh" type="file"/>
+                </div>
+
+                <button type="submit" class="submit-button">Tải ảnh lên</button>
+            </div>
+        </form>
+
+        <form  th:action="@{/update-link}" id="formLink" class="formLink" method="post" th:if="${congViecChiTiet != null}" >
+            <input type="hidden" name="id" th:value="${congViecChiTiet.id}" />
+            <input type="hidden" name="idDuAn" th:value="${idDuAn}" />
+            <div class="modal-containerLink">
+                <div class="modal-header">
+                    <h2>Thêm link đính kèm</h2>
+                    <button type="button" class="close-buttonLink" aria-label="Đóng">x</button>
+                </div>
+                <form>
+                    <div class="form-groupLink">
+                        <label for="attachment-link">Link đính kèm:</label>
+                        <input type="text" name="linkDinhKem" id="attachment-link" class="text-inputLink" placeholder="Dán link đính kèm">
+                    </div>
+                    <div class="button-groupLink">
+                        <button type="submit" class="btn btn-primaryLink">Thêm link đính kèm</button>
+                    </div>
+                </form>
+            </div>
+        </form>
+
+    </main>
+</div>
+
+<div id="pollModal" class="modal-overlay">
+    <div class="modal-content">
+        <!-- Header -->
+        <div class="modal-header">
+            <h2>Tạo cuộc bình chọn</h2>
+            <button class="close-button">×</button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body">
+            <form id="pollForm" action="/add-binh-chon" th:object="${binhChon}" method="post">
+                <div class="form-group">
+                    <label for="phase-select">Chọn giai đoạn</label>
+                    <div class="input-wrapper">
+                        <select id="phase-select" class="form-control" name="idGiaiDoan">
+                            <option th:each="gv: ${dsGiaiDoan}"
+                                    th:value="${gv.id}"
+                                    th:text="${gv.tenGiaiDoan}"></option>
+                        </select>
+                        <span class="icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="start-date">Ngày bắt đầu</label>
+                    <div class="input-wrapper">
+                        <input type="date" id="start-date" class="form-control" name="ngayBatDau">
+                        <span class="icon">
+                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="end-date">Ngày kết thúc cụ thể</label>
+                    <div class="input-wrapper">
+                        <input type="date" id="end-date" class="form-control" name="ngayKetThuc">
+                        <span class="icon">
+                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <input type="hidden" name="idDuAn" th:value="${idDuAn}" />
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button class="btn btn-primary" id="okBtn" type="submit" >OK</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Footer -->
+
+    </div>
+</div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // ---- LOGIC CHO DROPDOWN BÌNH CHỌN (ĐÃ SỬA) ---- //
+        const pollBtn = document.getElementById('pollBtn');
+        const pollDropdown = document.getElementById('pollDropdown');
+
+        if (pollBtn && pollDropdown) {
+            pollBtn.addEventListener('click', function(event) {
+                // Khi click vào nút, bật/tắt menu dropdown
+                pollDropdown.classList.toggle('show');
+            });
+        }
+
+        // Lắng nghe sự kiện click trên toàn bộ trang
+        document.addEventListener('click', function(event) {
+            // Nếu dropdown đang mở VÀ click không phải là vào nút "Bình chọn" hoặc vào trong dropdown
+            if (pollDropdown && pollDropdown.classList.contains('show') && !pollBtn.contains(event.target) && !pollDropdown.contains(event.target)) {
+                // thì đóng dropdown lại
+                pollDropdown.classList.remove('show');
+            }
+        });
+
+
+        // ---- SCRIPT CHO CÁC NÚT TẠO ---- //
+        const btnTaoGiaiDoan = document.getElementById('btnTaoGiaiDoan');
+        if (btnTaoGiaiDoan) {
+            const inputContainer = document.querySelector('.inputContainer');
+            btnTaoGiaiDoan.addEventListener('click', function() {
+                if (inputContainer.style.display === 'none' || inputContainer.style.display === '') {
+                    inputContainer.style.display = 'block';
+                } else {
+                    inputContainer.style.display = 'none';
+                }
+            });
+        }
+
+        const btnTaoCongViec = document.getElementById('btnTaoCongViec');
+        if(btnTaoCongViec){
+            const inputCongViec = document.querySelector('.inputCongViec');
+            btnTaoCongViec.addEventListener('click', function() {
+                if (inputCongViec.style.display === 'none' || inputCongViec.style.display === '') {
+                    inputCongViec.style.display = 'block';
+                } else {
+                    inputCongViec.style.display = 'none';
+                }
+            });
+        }
+
+        // ---- SCRIPT CHO MODAL CHI TIẾT CÔNG VIỆC ---- //
+        /*<![CDATA[*/
+        let shouldOpenDetailModal = /*[[${openModal}]]*/ false;
+        if (shouldOpenDetailModal) {
+            const formChiTiet = document.getElementById("formChiTiet");
+            if(formChiTiet) {
+                formChiTiet.style.display = "flex";
+            }
+        }
+        /*]]>*/
+
+        // Chỉ gán sự kiện nếu các nút và form tồn tại trong HTML
+        const kieuCVButton = document.getElementById("kieuCVButton");
+        const formKieuCV = document.getElementById("fromKieuCV");
+        if (kieuCVButton && formKieuCV) {
+            const closeBtn = formKieuCV.querySelector(".close-button");
+            kieuCVButton.addEventListener("click", function () {
+                formKieuCV.style.display = "flex";
+            });
+            if(closeBtn) {
+                closeBtn.addEventListener("click", function () {
+                    formKieuCV.style.display = "none";
+                });
+            }
+        }
+
+        const nhanButton = document.getElementById("nhanButton");
+        const formNhan = document.getElementById("fromNhan");
+        if (nhanButton && formNhan) {
+            const closeBtn = formNhan.querySelector(".close-button");
+            nhanButton.addEventListener("click", function () {
+                formNhan.style.display = "flex";
+            });
+            if(closeBtn) {
+                closeBtn.addEventListener("click", function () {
+                    formNhan.style.display = "none";
+                });
+            }
+        }
+
+        const ngayHanButton = document.getElementById("ngayHanButton");
+        const formNgayHan = document.getElementById("fromNgayHan");
+        if(ngayHanButton && formNgayHan) {
+            const closeBtn = formNgayHan.querySelector(".close-buttonNgayHan");
+            ngayHanButton.addEventListener("click", function () {
+                formNgayHan.style.display = "flex";
+            });
+            if(closeBtn) {
+                closeBtn.addEventListener("click", function () {
+                    formNgayHan.style.display = "none";
+                });
+            }
+        }
+
+        const anhButton = document.getElementById("anhButton");
+        const formAnh = document.getElementById("fromAnh");
+        if(anhButton && formAnh){
+            const closeBtn = formAnh.querySelector(".close-buttonAnh");
+            anhButton.addEventListener("click", function () {
+                formAnh.style.display = "flex";
+            });
+            if(closeBtn) {
+                closeBtn.addEventListener("click", function () {
+                    formAnh.style.display = "none";
+                });
+            }
+        }
+
+        const linkButton = document.getElementById("linkButton");
+        const formLink = document.getElementById("formLink");
+        if(linkButton && formLink){
+            const closeBtn = formLink.querySelector(".close-buttonLink");
+            linkButton.addEventListener("click", function () {
+                formLink.style.display = "flex";
+            });
+            if(closeBtn) {
+                closeBtn.addEventListener("click", function () {
+                    formLink.style.display = "none";
+                });
+            }
+        }
+
+        // ---- SCRIPT KÉO THẢ ---- //
+        document.querySelectorAll('.task-input-area').forEach(function(el) {
+            new Sortable(el, {
+                group: 'shared-tasks',
+                animation: 150,
+                onAdd: function (evt) {
+                    const idCongViec = evt.item.dataset.id;
+                    const idGiaiDoan = evt.to.dataset.gdId;
+
+                    fetch("/cong-viec/gan-giai-doan", {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `idCongViec=${idCongViec}&idGiaiDoan=${idGiaiDoan}`
+                    })
+                        .then(res => res.text())
+                        .then(msg => console.log(msg)); // Log ra console thay vì alert
+                }
+            });
+        });
+
+        // ---- SCRIPT CHO MODAL BÌNH CHỌN ---- //
+        const pollModal = document.getElementById('pollModal');
+        const openPollBtn = document.getElementById('openModalBtn');
+
+        if (pollModal && openPollBtn) {
+            const closePollBtn = pollModal.querySelector('.close-button');
+            const cancelPollBtn = document.getElementById('cancelBtn');
+
+            const openPollModal = () => { pollModal.style.display = 'flex'; };
+            const closePollModal = () => { pollModal.style.display = 'none'; };
+
+            openPollBtn.addEventListener('click', openPollModal);
+            closePollBtn.addEventListener('click', closePollModal);
+            cancelPollBtn.addEventListener('click', closePollModal);
+
+            pollModal.addEventListener('click', (event) => {
+                if (event.target === pollModal) {
+                    closePollModal();
+                }
+            });
+
+            window.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && pollModal.style.display === 'flex') {
+                    closePollModal();
+                }
+            });
+        }
+    });
+
+    // ---- CÁC HÀM TIỆN ÍCH TOÀN CỤC ---- //
+    function anFormChiTiet() {
+        const form = document.getElementById('formChiTiet');
+        if (form) {
+            form.style.display = 'none';
+            const url = new URL(window.location);
+            url.searchParams.delete('idDuAn'); // Xóa các param không cần thiết
+            url.searchParams.delete('id');
+            window.history.pushState({}, '', url); // Cập nhật URL mà không reload
+        }
+    }
+
+    function hienNutLuu() {
+        const nut = document.getElementById("nutLuuMoTa");
+        if(nut) {
+            nut.style.display = "inline-block";
+        }
+    }
+</script>
+</html>

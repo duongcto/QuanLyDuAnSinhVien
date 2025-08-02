@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bảng Công Việc Trello</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/task_line.css}" />
+    <script th:src="@{/js/task_line.js}" defer></script>
+</head>
+<body>
+
+
+
+<div class="board-container">
+    <!--    Thông báo-->
+    <div class="custom-alert-container" >
+        <div th:if="${successMessage}" class="alert alert-success slide-in-left" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${successMessage}">Thành công!</span>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger slide-in-left" role="alert">
+            <i class="bi bi-x-circle-fill me-2"></i>
+            <span th:text="${errorMessage}"></span>
+        </div>
+    </div>
+
+    <div th:each="entry : ${kanban}">
+        <div class="column" th:data-column-id="${entry.key.id}" >
+            <div class="column-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 th:text="${entry.key.columnName}">Tên cột</h2>
+
+                <!-- Nút xóa cột -->
+                <a th:href="@{/deleteColumn/{id}(id=${entry.key.id})}" class="delete-column-btn" title="Xóa cột">
+                    <i class="fas fa-times"></i>
+                </a>
+
+            </div>
+
+
+            <div class="cards-container">
+                <div th:each="cv : ${entry.value}" class="card"
+                     th:data-card-id="${cv.id}"
+                     th:data-card-title="${cv.tenCongViec}"
+                     th:data-card-description="${cv.moTa}"
+                     th:data-card-priority="${cv.doUuTien}"
+                     th:data-card-due-date="${cv.ngayHetHan != null ? #temporals.format(cv.ngayHetHan, 'yyyy-MM-dd') : ''}"
+                     th:data-card-assigned-to="${cv.thanhVien}"
+                     th:data-card-labels="${cv.nhanDan}"
+                     th:data-card-attachment="${cv.linkDinhKem}"
+                     draggable="true">
+                    <div th:if="${cv.nhanDan != null and !cv.nhanDan.isEmpty()}" class="card-labels">
+                        <th:block th:each="label : ${#strings.arraySplit(cv.nhanDan, ',')}">
+                            <span th:text="${#strings.trim(label)}"
+                                  th:classappend="${#strings.toLowerCase(#strings.trim(label)).contains('backend') ? 'label-backend' :
+                                                  (#strings.toLowerCase(#strings.trim(label)).contains('frontend') ? 'label-frontend' :
+                                                  (#strings.toLowerCase(#strings.trim(label)).contains('bug') ? 'label-bug' :
+                                                  (#strings.toLowerCase(#strings.trim(label)).contains('ưu tiên cao') ? 'label-priority-high' :
+                                                  (#strings.toLowerCase(#strings.trim(label)).contains('database') ? 'label-database' :
+                                                  (#strings.toLowerCase(#strings.trim(label)).contains('review') ? 'label-review' :
+                                                  (#strings.toLowerCase(#strings.trim(label)).contains('setup') ? 'label-setup' :
+                                                  (#strings.toLowerCase(#strings.trim(label)).contains('testing') ? 'label-testing' :
+                                                  (#strings.toLowerCase(#strings.trim(label)).contains('phân tích') ? 'label-analysis' : ''))))))))}"
+                                  class="card-label">Nhãn</span>
+                        </th:block>
+                    </div>
+
+                    <p class="card-title" th:text="${cv.tenCongViec}">Tên công việc</p>
+                    <div class="card-meta">
+                        <div th:if="${cv.ngayHetHan != null}" class="card-meta-item">
+                            <i class="far fa-clock"></i>
+                            <span th:text="${#temporals.format(cv.ngayHetHan, 'dd MMM')}">Ngày hết hạn</span>
+                        </div>
+                        <div th:if="${cv.doUuTien != null and !cv.doUuTien.isEmpty()}" class="card-meta-item">
+                            <i class="fas fa-flag"></i>
+                            <span th:text="${cv.doUuTien}"
+                                  th:classappend="${#strings.toLowerCase(cv.doUuTien).contains('cao') ? 'priority-high' :
+                                                  (#strings.toLowerCase(cv.doUuTien).contains('rất cao') ? 'priority-very-high' :
+                                                  (#strings.toLowerCase(cv.doUuTien).contains('trung bình') ? 'priority-medium' :
+                                                  (#strings.toLowerCase(cv.doUuTien).contains('thấp') ? 'priority-low' : '')))}">Độ ưu tiên</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="add-list-wrapper">
+        <button class="add-list-button" id="addListButton">
+            <span class="plus-icon">+</span> Thêm danh sách khác
+        </button>
+        <form action="/addColumn" method="POST">
+            <div class="add-list-input-container hidden" id="addListInputContainer">
+                <input type="text" name="addColumn" class="add-list-input" id="listNameInput" placeholder="Nhập tên danh sách...">
+                <div class="add-list-actions">
+                    <button class="add-list-confirm-button" id="addListConfirmButton" type="submit">Thêm danh sách</button>
+                    <span class="close-icon" id="closeAddListInput">×</span>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Structure (Global Overlay) -->
+<div id="globalModalOverlay" class="modal-overlay">
+    <!-- Task Card Modal (Main Card Detail) -->
+    <div class="task-card-modal" id="taskCardModal">
+        <div class="task-header">
+            <div class="task-header-left">
+                <label class="dropdown-trigger" id="taskTieuDe"></label>
+            </div>
+            <div class="task-header-right">
+                <i class="fas fa-times" id="closeTaskCardModalBtn"></i>
+            </div>
+        </div>
+
+
+        <div class="task-content">
+            <div class="members-section">
+                <div id="enddate" style="display: flex" class="members-list"></div>
+                <br>
+            </div>
+            <div class="members-uutien">
+                <i class="fas fa-flag"></i>
+                <div id="uuTien" style="display: flex" class="card-meta-item">ok</div>
+                <br>
+            </div>
+
+            <div class="task-title-section">
+                <input type="text" class="task-title-input" id="taskTitleInput" value="" placeholder="Tiêu đề công việc">
+            </div>
+
+            <div class="members-section">
+                <h6></h6> <div id="membersListContainer" class="members-list"></div>
+                <br>
+            </div>
+
+
+
+
+
+
+            <div class="task-buttons">
+                <button class="task-button" id="addBtn">
+                    <i class="fas fa-plus"></i> Thêm
+                </button>
+                <button class="task-button" id="tagBtn">
+                    <i class="fas fa-tag"></i> Nhãn
+                </button>
+                <button class="task-button" id="dateBtn">
+                    <i class="fas fa-calendar-alt"></i> Ngày
+                </button>
+
+                <button class="task-button" id="priorityBtn">
+                    <i class="fas fa-briefcase"></i> Độ ưu tiên
+                </button>
+
+                <button class="task-button" id="memberBtn">
+                    <i class="fas fa-users"></i> Thành viên
+                </button>
+            </div>
+
+            <div class="task-description-section">
+                <p>Mô tả</p>
+                <textarea class="task-description-input" id="taskDescriptionInput" placeholder="Thêm mô tả chi tiết hơn..."></textarea>
+                <button class="submit-description-button" id="submitDescriptionButton">Gửi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Label Popup Modal (cửa sổ chính giữa) -->
+    <div class="label-popup-modal" id="labelPopupModal">
+        <div class="modal-header">
+            <h3>Nhãn</h3>
+            <button class="close-button" id="closeLabelModal"><i class="fas fa-times"></i></button>
+        </div>
+        <input type="text" placeholder="Tìm nhãn...">
+        <div class="label-list">
+            <div class="label-item">
+                <input type="checkbox">
+                <div class="label-color-box" style="background-color: #61bd4f;"></div>
+                <span class="label-name">Quan trọng</span>
+                <i class="fas fa-pencil-alt label-edit-icon"></i>
+            </div>
+            <div class="label-item">
+                <input type="checkbox">
+                <div class="label-color-box" style="background-color: #f2d600;"></div>
+                <span class="label-name">Đang tiến hành</span>
+                <i class="fas fa-pencil-alt label-edit-icon"></i>
+            </div>
+            <div class="label-item">
+                <input type="checkbox">
+                <div class="label-color-box" style="background-color: #ff9f1a;"></div>
+                <span class="label-name">Ưu tiên cao</span>
+                <i class="fas fa-pencil-alt label-edit-icon"></i>
+            </div>
+            <div class="label-item">
+                <input type="checkbox">
+                <div class="label-color-box" style="background-color: #eb5a46;"></div>
+                <span class="label-name">Khẩn cấp</span>
+                <i class="fas fa-pencil-alt label-edit-icon"></i>
+            </div>
+            <div class="label-item">
+                <input type="checkbox">
+                <div class="label-color-box" style="background-color: #c377e0;"></div>
+                <span class="label-name">Đã hoàn thành</span>
+                <i class="fas fa-pencil-alt label-edit-icon"></i>
+            </div>
+            <div class="label-item">
+                <input type="checkbox">
+                <div class="label-color-box" style="background-color: #0079bf;"></div>
+                <span class="label-name">Cần xem xét</span>
+                <i class="fas fa-pencil-alt label-edit-icon"></i>
+            </div>
+            <div class="label-item">
+                <input type="checkbox">
+                <div class="label-color-box" style="background-color: #51e898;"></div>
+                <span class="label-name">Mới</span>
+                <i class="fas fa-pencil-alt label-edit-icon"></i>
+            </div>
+            <div class="label-item">
+                <input type="checkbox">
+                <div class="label-color-box" style="background-color: #ff78cb;"></div>
+                <span class="label-name">Thiết kế</span>
+                <i class="fas fa-pencil-alt label-edit-icon"></i>
+            </div>
+        </div>
+        <div class="label-buttons-footer">
+            <button>Tạo nhãn mới</button>
+        </div>
+    </div>
+
+    <!-- Date Popup Modal (cửa sổ chính giữa) -->
+    <div class="date-popup-modal" id="datePopupModal">
+        <div class="modal-header">
+            <h3>Ngày</h3>
+            <button class="close-button" id="closeDateModal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="date-input-group">
+            <input type="checkbox" id="startDateCheckbox" checked>
+            <label for="startDateCheckbox">Ngày bắt đầu</label>
+            <input type="date" id="startDateInput">
+        </div>
+
+        <div class="date-input-group">
+            <input type="checkbox" id="dueDateCheckbox" checked>
+            <label for="dueDateCheckbox">Ngày hết hạn</label>
+            <input type="date" id="dueDateInput">
+        </div>
+
+
+
+        <div class="date-modal-footer">
+            <button class="save-button" id="saveDateButton">Lưu</button>
+        </div>
+    </div>
+
+    <!-- Member Popup Modal (cửa sổ chính giữa) -->
+    <div class="member-popup-modal" id="memberPopupModal">
+        <div class="modal-header">
+            <h3>Thêm thành viên</h3>
+            <button class="close-button" id="closeMemberModal"><i class="fas fa-times"></i></button>
+        </div>
+        <input type="text" placeholder="Tìm kiếm thành viên...">
+        <div class="member-list" th:each="nd : ${nguoiDung}">
+            <div class="member-item">
+                <div class="member-avatar">
+                    <img th:src="'https://www.google.com/s2/photos/profile/' + ${nd.getEmailPt()}"
+                         onerror="this.onerror=null;this.src='https://placehold.co/32x32/FFD700/000000?text=';"
+                         alt="Avatar"
+                         width="32" height="32">
+                </div>
+                <div class="member-info" >
+                    <div class="member-name" th:text="${nd.hoTen}"></div>
+                    <div class="member-email" th:text="${nd.emailPt}"></div>
+                </div>
+                <input type="checkbox" th:value="${nd.id}" class="member-checkbox" data-user-id="${nd.id}">
+            </div>
+        </div>
+    </div>
+    <!--///////////////////////////////////Ưu Tiên/////////////////////////////// -->
+
+    <!-- Priority Popup Modal (cửa sổ chính giữa) -->
+    <div id="priorityPopupModal" class="priority-modal">
+        <div class="modal-headers">
+            <h3>Độ ưu tiên</h3>
+            <button class="close-btn" id="closePriorityModal"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="priority-options">
+            <div class="priority-item" data-priority="Rất cao" data-display-text="Rất cao">
+                <span class="icon"><i class="fa-regular fa-bell"></i></span>
+                <span class="label">Quan trọng</span>
+                <span class="check-icon"><i class="fa-solid fa-check"></i></span>
+            </div>
+            <div class="priority-item" data-priority="Cao" data-display-text="Cao">
+                <span class="icon"><i class="fa-solid fa-caret-up"></i></span>
+                <span class="label">Cao</span>
+                <span class="check-icon"><i class="fa-solid fa-check"></i></span>
+            </div>
+            <div class="priority-item" data-priority="Trung bình" data-display-text="Trung bình">
+                <span class="icon">=</span>
+                <span class="label">Trung bình</span>
+                <span class="check-icon"><i class="fa-solid fa-check"></i></span>
+            </div>
+            <div class="priority-item" data-priority="Thấp" data-display-text="Thấp">
+                <span class="icon"><i class="fa-solid fa-caret-down"></i></span>
+                <span class="label">Thấp</span>
+                <span class="check-icon"><i class="fa-solid fa-check"></i></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+</body>
+</html>

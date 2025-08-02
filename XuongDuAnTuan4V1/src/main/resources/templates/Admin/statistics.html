@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Thống kê dự án</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    /* ... giữ nguyên phần CSS ... */
+  </style>
+</head>
+<body>
+<div class="main">
+  <div class="charts" style="display: flex">
+    <div class="chart-container">
+      <canvas id="progressPieChart" width="200" height="200"></canvas>
+      <p>Tiến độ tổng thể</p>
+    </div>
+    <div class="chart-container">
+      <canvas id="userPieChart" width="200" height="200"></canvas>
+      <p>Thống kê người dùng</p>
+    </div>
+  </div>
+  <div class="bar-chart" style="height: 600px;width: 100%; padding-left: 100px">
+    <div class="bar-chart-container" style="height: 48%; width: 80%; margin-bottom: 70px">
+      <canvas id="projectBarChart"></canvas>
+      <h3>Tiến độ từng dự án</h3>
+    </div>
+    <div class="bar-chart-container card" style="height:48%; width: 80%;">
+      <canvas id="projectListBarChart"></canvas>
+      <h3>Số lượng dự án theo loại</h3>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Biểu đồ tròn tiến độ tổng thể
+  fetch('/api/statistics/progress')
+          .then(res => res.json())
+          .then(data => {
+            new Chart(document.getElementById("progressPieChart"), {
+              type: "pie",
+              data: {
+                labels: ["Hoàn thành", "Chưa hoàn thành"],
+                datasets: [{
+                  data: [data.completed, data.notCompleted],
+                  backgroundColor: ["green", "#ccc"]
+                }]
+              },
+              options: {
+                plugins: { legend: { display: true } },
+                responsive: false
+              }
+            });
+          });
+
+  // Biểu đồ tròn người dùng
+  fetch('/api/statistics/users')
+          .then(res => res.json())
+          .then(data => {
+            new Chart(document.getElementById("userPieChart"), {
+              type: "pie",
+              data: {
+                labels: ["Đang học", "Dừng học"],
+                datasets: [{
+                  data: [data.active, data.inactive],
+                  backgroundColor: ["orange", "#ccc"]
+                }]
+              },
+              options: {
+                plugins: { legend: { display: true } },
+                responsive: false
+              }
+            });
+          });
+
+  // Biểu đồ cột tiến độ từng dự án
+  fetch('/api/statistics/projects-bar')
+          .then(res => res.json())
+          .then(data => {
+            new Chart(document.getElementById("projectBarChart"), {
+              type: "bar",
+              data: {
+                labels: data.labels,
+                datasets: [{
+                  label: "Tiến độ (%)",
+                  data: data.data,
+                  backgroundColor: "orange"
+                }]
+              },
+              options: {
+                scales: {
+                  y: { beginAtZero: true, max: 100 }
+                },
+                plugins: {
+                  legend: {
+                    display: false
+                  }
+                }
+              }
+            });
+          });
+
+  // Biểu đồ cột số lượng dự án theo loại
+  // Biểu đồ cột danh sách dự án hiện có
+  fetch('/api/statistics/projects-list-bar')
+          .then(res => res.json())
+          .then(data => {
+            new Chart(document.getElementById("projectListBarChart"), {
+              type: "bar",
+              data: {
+                labels: data.labels,
+                datasets: [{
+                  label: "Số lượng",
+                  data: data.data,
+                  backgroundColor: "#6ad1e3"
+                }]
+              },
+              options: {
+                scales: {
+                  y: { beginAtZero: true, stepSize: 1 }
+                },
+                plugins: {
+                  legend: { display: false }
+                },
+                responsive: true
+              }
+            });
+          });
+</script>
+</body>
+</html>

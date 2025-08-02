@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<table class="table table-hover align-middle mb-0">
+    <thead>
+    <tr>
+        <th>ID</th><th>Mã</th><th>Họ Tên</th><th>EmailFT</th><th>EmailFE</th><th>Điện Thoại</th>
+        <th>Ngày Tạo</th><th>Update</th><th>Trạng Thái</th><th>Hành Động</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${nguoiDung}" th:attr="data-user-id=${user.id}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.maNguoiDung}"></td>
+        <td th:text="${user.hoTen}"></td>
+        <td th:text="${user.emailPt}"></td>
+        <td th:text="${user.emailFe}"></td>
+        <td th:text="${user.soDienThoai}"></td>
+        <td th:text="${user.ngayTao}"></td>
+        <td th:text="${user.ngayUpdate}"></td>
+        <td th:text="${user.trangThai ? 'Đi Học' : 'Dừng Học'}"></td>
+
+    </tr>
+    <tr th:if="${#lists.isEmpty(nguoiDung)}">
+        <td colspan="10" class="text-center text-muted">Không có sinh viên này.</td>
+    </tr>
+    </tbody>
+
+</table>
+</body>
+</html>

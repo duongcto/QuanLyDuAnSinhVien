@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Chọn thành viên</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <style>
+        /* Optional custom styles for a bit more flair */
+        body {
+            background-color: #f8f9fa; /* Light grey background */
+        }
+        .container {
+            max-width: 600px; /* Limit container width for better readability on large screens */
+            background-color: #ffffff; /* White background for the form area */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            margin-top: 50px; /* More top margin */
+        }
+        h5 {
+            color: #343a40; /* Darker heading color */
+            margin-bottom: 25px; /* Spacing below heading */
+            font-weight: 600;
+        }
+        .form-check {
+            padding: 8px 0; /* Vertical padding for each checkbox */
+            border-bottom: 1px solid #eee; /* Light separator for each member */
+            transition: background-color 0.2s ease-in-out; /* Smooth hover effect */
+        }
+        .form-check:last-child {
+            border-bottom: none; /* No border for the last item */
+        }
+        .form-check:hover {
+            background-color: #f0f0f0; /* Light highlight on hover */
+        }
+        .form-check-input {
+            margin-top: 0.3em; /* Align checkbox better with text */
+            margin-right: 10px; /* Space between checkbox and label */
+        }
+        .form-check-label {
+            font-size: 1.05rem; /* Slightly larger text for names */
+            color: #495057; /* Slightly darker text color */
+        }
+        .btn {
+            padding: 10px 20px; /* Larger buttons */
+            font-size: 1rem;
+            border-radius: 5px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h5>Chọn thành viên cho công việc: <span th:text="${congViec.tenCongViec}">Tên công việc</span></h5>
+    <form th:action="@{/congviec/luu-thanh-vien-CV/{taskIds}(taskIds=${taskId})}" method="post">
+        <input type="hidden" name="taskId" th:value="${taskId}">
+        <div class="mb-3"> <div th:each="tv : ${thanhVienList}" class="form-check">
+            <input class="form-check-input" type="checkbox"
+                   name="selectedMembers"
+                   th:value="${tv.id}" th:id="'tv' + ${tv.id}"
+                   th:checked="${selectedIds.contains(tv.id)}">
+            <label class="form-check-label" th:for="'tv' + ${tv.id}" th:text="${tv.hoTen}">Thành viên</label>
+        </div>
+        </div>
+        <div class="mt-4 d-flex justify-content-end gap-2"> <a th:href="@{/congviec}" class="btn btn-secondary">Huỷ</a>
+            <button type="submit" class="btn btn-primary">Lưu thành viên</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

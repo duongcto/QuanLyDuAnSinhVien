@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý sinh viên</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container-fluid {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: white;
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 15px 20px;
+            border: none;
+        }
+
+        .card:not(.filter-section) .card-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #495057;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .filter-section .card-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #495057;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 15px 20px;
+            border: none;
+        }
+
+        .filter-section .form-control,
+        .filter-section .form-select {
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-section .form-control:focus,
+        .filter-section .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .filter-section .d-flex {
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-section .btn-search-gradient {
+            background: #6c757d;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-section .btn-search-gradient:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .table-responsive {
+            border-radius: 0 0 12px 12px;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            padding: 15px;
+            font-weight: 600;
+            color: #495057;
+            text-align: center;
+        }
+
+        .table tbody td {
+            padding: 12px 15px;
+            vertical-align: middle;
+            text-align: center;
+            border: none;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transition: background-color 0.3s ease;
+        }
+
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: white;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .pagination .page-item .page-link {
+            border-radius: 8px;
+            margin: 0 3px;
+            border: 1px solid #e0e0e0;
+            color: #667eea;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+
+        .pagination .page-item .page-link:hover {
+            background-color: #f8f9fa;
+            border-color: #667eea;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            padding: 10px 15px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .btn-custom-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-export {
+            background: #28a745;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-import {
+            background: #ffc107;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add {
+            background: #17a2b8;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-search-gradient {
+            background: #6c757d;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-search-gradient:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 2px;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 2px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            border: none;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #e0e0e0;
+            padding: 15px 20px;
+        }
+
+        .alert {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .custom-alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            width: 300px;
+        }
+
+        @keyframes slideInLeft {
+            0% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.5s ease-out;
+        }
+
+        .trash {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: white;
+            z-index: 1055;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .trash.ringing {
+            animation: shake 0.4s;
+            transform: scale(1.1);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Thông báo -->
+        <div class="custom-alert-container">
+            <div th:if="${successMessage}" class="alert alert-success slide-in-left" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${successMessage}">Thành công!</span>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger slide-in-left" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${errorMessage}">Thất bại!</span>
+            </div>
+        </div>
+
+        <!-- Phần lọc/tìm kiếm -->
+        <div class="card filter-section">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Lọc/Tìm kiếm</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <!-- Tìm kiếm -->
+                    <div class="col-md-4">
+                        <label class="form-label">Tìm kiếm</label>
+                        <form th:action="@{/searchSinhVien}" method="POST" class="d-flex">
+                            <input type="text" class="form-control me-2" placeholder="Nhập từ họ tên, email, số điện thoại!" name="studentName" th:value="${searchName}">
+                            <button type="submit" class="btn btn-search-gradient">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Lọc vai trò -->
+                    <div class="col-md-4">
+                        <label class="form-label">Lọc vai trò</label>
+                        <form th:action="@{/locVaiTroSinhVien}" method="GET" class="d-flex">
+                            <select class="form-select me-2" name="idVaiTro">
+                                <option value="">Chọn vai trò</option>
+                                <option th:each="vaiTro:${listVaiTro}" th:value="${vaiTro.id}" th:text="${vaiTro.tenVaiTro}"></option>
+                            </select>
+                            <button type="submit" class="btn btn-search-gradient">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Lọc trạng thái -->
+                    <div class="col-md-4">
+                        <label class="form-label">Lọc trạng thái</label>
+                        <form th:action="@{/locTrangThaiSinhVien}" method="GET" class="d-flex">
+                            <select class="form-select me-2" name="trangThai">
+                                <option value="">Chọn trạng thái</option>
+                                <option value="Đang học" th:selected="${searchStatus == 'Đang học'}">Đang học</option>
+                                <option value="Dừng học" th:selected="${searchStatus == 'Dừng học'}">Dừng học</option>
+                            </select>
+                            <button type="submit" class="btn btn-search-gradient">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Nút hủy -->
+                    <div class="col-12">
+                        <button class="btn btn-secondary" onclick="resetForm()">
+                            <i class="fas fa-undo me-2"></i>Hủy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phần danh sách sinh viên -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                <div>
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Danh sách sinh viên</h5>
+                    <small class="text-muted">Ngày tạo: 01/01/2025 | Ngày cập nhật: 01/01/2025</small>
+                </div>
+                <div class="d-flex gap-2">
+                    <form method="POST" action="/importSinhVien" enctype="multipart/form-data" id="importForm" class="d-inline">
+                        <input type="file" id="fileInput" name="file" accept=".xlsx" style="display: none;" required />
+                        <button type="button" class="btn btn-import" onclick="triggerFileInput()">
+                            <i class="fas fa-upload me-2"></i>Import
+                        </button>
+                        <span id="fileName" class="text-white-50 ms-2"></span>
+                    </form>
+                    <a class="btn btn-export" href="/export-excelSinhVien">
+                        <i class="fas fa-file-excel me-2"></i>Xuất Excel
+                    </a>
+                    <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                        <i class="fas fa-plus-circle me-2"></i>Thêm sinh viên
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Mã</th>
+                            <th>Họ & tên</th>
+                            <th>Email FE</th>
+                            <th>Email FPT</th>
+                            <th>SĐT</th>
+                            <th>Vai trò</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user, stat : ${nguoiDung}" th:attr="data-user-id=${user.id}">
+                            <td th:text="${stat.count}"></td>
+                            <td th:text="${user.maNguoiDung}"></td>
+                            <td th:text="${user.hoTen}"></td>
+                            <td th:text="${user.emailFe}"></td>
+                            <td th:text="${user.emailPt}"></td>
+                            <td th:text="${user.soDienThoai}"></td>
+                            <td th:text="${user.idVaiTro.tenVaiTro}"></td>
+                            <td>
+                                <span th:class="${user.trangThai == 'Đang học' ? 'badge bg-success' : 'badge bg-danger'}" 
+                                      th:text="${user.trangThai}">
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-danger delete-btn" th:attr="data-id=${user.id}" title="Xóa">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                    <a class="btn btn-info" th:href="@{|/view-updateSinhVien/${user.id}|}" title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-info btn-detail" 
+                                            data-bs-toggle="modal" data-bs-target="#detailModal"
+                                            th:attr="
+                                            data-id=${user.id},
+                                            data-ma=${user.maNguoiDung},
+                                            data-hot=${user.hoTen},
+                                            data-tendn=${user.tenDangNhap},
+                                            data-emailpt=${user.emailPt},
+                                            data-emailfe=${user.emailFe},
+                                            data-sdt=${user.soDienThoai},
+                                            data-mk=${user.matKhau},
+                                            data-ngaytao=${user.ngayTao},
+                                            data-ngayupdate=${user.ngayUpdate},
+                                            data-trangthai=${user.trangThai},
+                                            data-vaitro=${user.idVaiTro.tenVaiTro}"
+                                            title="Chi tiết">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(nguoiDung)}">
+                            <td colspan="9" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-2x mb-3"></i>
+                                <br>Không có sinh viên nào.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Phân trang -->
+            <div class="pagination-controls" th:if="${!#lists.isEmpty(nguoiDung)}">
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{|?pageNo=${currentPage - 1}|}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link" th:href="@{|?pageNo=${i}|}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{|?pageNo=${currentPage + 1}|}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trash icon -->
+    <div class="trash" id="trash">
+        <i class="fas fa-trash-alt"></i>
+    </div>
+
+    <!-- Modal xác nhận xóa -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Xác nhận xóa
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa sinh viên này không?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" id="confirmDelete" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-2"></i>Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal thêm sinh viên -->
+    <div class="modal fade" id="addUserModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-plus me-2"></i>Thêm sinh viên
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="addSinhVien" method="POST" th:object="${NguoiDung}">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Mã sinh viên</label>
+                                <input type="text" class="form-control" th:field="*{maNguoiDung}" placeholder="Nhập mã sinh viên">
+                                <div class="text-danger" th:if="${messager1}" th:text="${messager1}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Họ tên</label>
+                                <input type="text" class="form-control" th:field="*{hoTen}" placeholder="Nhập họ tên">
+                                <div class="text-danger" th:if="${messager2}" th:text="${messager2}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tên đăng nhập</label>
+                                <input type="text" class="form-control" th:field="*{tenDangNhap}" placeholder="Nhập tên đăng nhập">
+                                <div class="text-danger" th:if="${messager3}" th:text="${messager3}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email FPT</label>
+                                <input type="email" class="form-control" th:field="*{emailPt}" placeholder="Nhập email FPT">
+                                <div class="text-danger" th:if="${messager5}" th:text="${messager5}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email FE</label>
+                                <input type="email" class="form-control" th:field="*{emailFe}" placeholder="Nhập email FE">
+                                <div class="text-danger" th:if="${messager4}" th:text="${messager4}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="text" class="form-control" th:field="*{soDienThoai}" placeholder="Nhập số điện thoại">
+                                <div class="text-danger" th:if="${messager6}" th:text="${messager6}"></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Mật khẩu</label>
+                                <input type="password" class="form-control" th:field="*{matKhau}" placeholder="Nhập mật khẩu">
+                                <div class="text-danger" th:if="${messager7}" th:text="${messager7}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Lưu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal chi tiết sinh viên -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user me-2"></i>Chi tiết sinh viên
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Mã sinh viên</label>
+                            <input type="text" id="detailMaNguoiDung" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Họ tên</label>
+                            <input type="text" id="detailHoTen" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tên đăng nhập</label>
+                            <input type="text" id="detailTenDangNhap" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email FPT</label>
+                            <input type="email" id="detailEmailPt" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email FE</label>
+                            <input type="email" id="detailEmailFe" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="text" id="detailSoDienThoai" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Mật khẩu</label>
+                            <input type="text" id="detailMatKhau" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ngày tạo</label>
+                            <input type="text" id="detailNgayTao" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ngày cập nhật</label>
+                            <input type="text" id="detailNgayUpdate" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Trạng thái</label>
+                            <select id="detailTrangThai" class="form-select" disabled>
+                                <option value="Đang học">Đang học</option>
+                                <option value="Dừng học">Dừng học</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Vai trò</label>
+                            <input type="text" id="detailVaiTro" class="form-control" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        let showModal = /*[[${showModal}]]*/ false;
+        if (showModal) {
+            document.addEventListener("DOMContentLoaded", function () {
+                let myModal = new bootstrap.Modal(document.getElementById('addUserModal'));
+                myModal.show();
+            });
+        }
+    </script>
+
+    <script>
+        // Auto hide alerts
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 4000);
+
+        // Reset form function
+        function resetForm() {
+            window.location.href = '/hienThiSinhVien';
+        }
+
+        // File import handling
+        function triggerFileInput() {
+            document.getElementById('fileInput').click();
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function () {
+            if (this.files.length > 0) {
+                document.getElementById('fileName').textContent = this.files[0].name;
+                document.getElementById('importForm').submit();
+            }
+        });
+
+        // Delete functionality
+        let deleteId = null;
+        let deleteRow = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const trash = document.getElementById('trash');
+
+            // Handle detail button clicks
+            document.querySelectorAll('.btn-detail').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.getElementById('detailMaNguoiDung').value = button.getAttribute('data-ma');
+                    document.getElementById('detailHoTen').value = button.getAttribute('data-hot');
+                    document.getElementById('detailTenDangNhap').value = button.getAttribute('data-tendn');
+                    document.getElementById('detailEmailPt').value = button.getAttribute('data-emailpt');
+                    document.getElementById('detailEmailFe').value = button.getAttribute('data-emailfe');
+                    document.getElementById('detailSoDienThoai').value = button.getAttribute('data-sdt');
+                    document.getElementById('detailMatKhau').value = button.getAttribute('data-mk');
+                    document.getElementById('detailNgayTao').value = button.getAttribute('data-ngaytao');
+                    document.getElementById('detailNgayUpdate').value = button.getAttribute('data-ngayupdate');
+                    document.getElementById('detailTrangThai').value = button.getAttribute('data-trangthai');
+                    document.getElementById('detailVaiTro').value = button.getAttribute('data-vaitro');
+                });
+            });
+
+            // Handle delete button clicks
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    deleteId = btn.getAttribute('data-id');
+                    deleteRow = btn.closest('tr');
+                    new bootstrap.Modal(document.getElementById('confirmModal')).show();
+                });
+            });
+
+            // Handle confirm delete
+            document.getElementById('confirmDelete').addEventListener('click', () => {
+                if (deleteRow && deleteId) {
+                    const trash = document.getElementById('trash');
+                    const trashRect = trash.getBoundingClientRect();
+                    const rowRect = deleteRow.getBoundingClientRect();
+
+                    const deltaX = trashRect.left + trashRect.width / 2 - (rowRect.left + rowRect.width / 2);
+                    const deltaY = trashRect.top + trashRect.height / 2 - (rowRect.top + rowRect.height / 2);
+
+                    deleteRow.style.transition = 'transform 0.5s ease, opacity 0.5s ease, height 0.5s ease';
+                    deleteRow.style.transformOrigin = 'center center';
+                    deleteRow.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0)`;
+                    deleteRow.style.opacity = '0';
+                    deleteRow.style.height = '0px';
+                    trash.classList.add('ringing');
+
+                    setTimeout(() => {
+                        fetch(`/deleteSinhVien/${deleteId}`, { method: 'GET' })
+                            .then(() => deleteRow.remove())
+                            .catch(err => alert("Lỗi khi xóa: " + err));
+                        trash.classList.remove('ringing');
+                    }, 500);
+
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+                    modal.hide();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

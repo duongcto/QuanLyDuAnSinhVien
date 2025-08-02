@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Quản lý báo cáo dự án</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .calendar-header-cell {
+            text-align: center;
+            font-weight: bold;
+            padding: 8px 0;
+        }
+
+        .calendar-day {
+            width: 160px;
+            height: 90px;
+            aspect-ratio: 1;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            position: relative;
+            font-size: 14px;
+            transition: 0.2s;
+            cursor: pointer;
+            background-color: #fff;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+        }
+
+        .calendar-day:hover {
+            background-color: #f0f0f0;
+        }
+
+        .calendar-day.has-report {
+            background-color: #d4f7d4;
+            font-weight: bold;
+            border: 2px solid #28a745;
+        }
+
+        .calendar-day-box {
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        .calendar-day-box .day-number {
+            font-size: 13px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .report-status {
+            font-size: 12px;
+            color: #28a745;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .selected-date-box {
+            background-color: #e0f7fa;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 1rem;
+        }
+
+        /* CSS Style */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            width: 80%;
+            max-height: 90%;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+        .modal table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .modal th,
+        .modal td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .modal th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+
+        .tag {
+            background-color: #eaffea;
+            padding: 5px 10px;
+            border-radius: 15px;
+            display: inline-block;
+            color: green;
+            font-size: 13px;
+        }
+
+        .status.done {
+            background-color: #eaffea;
+            color: green;
+            border-radius: 15px;
+            padding: 5px 10px;
+            display: inline-block;
+            font-size: 13px;
+        }
+
+        .member-list-scroll {
+            max-height: 120px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+
+<body>
+<!-- Updated: 2025-06-29 - Fixed Thymeleaf expression -->
+<div class="col-md-10 p-4">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h4>Quản lý báo cáo dự án</h4>
+            <h5 class="text-muted">Tên dự án: <span th:text="${tenDuAn}"></span></h5>
+            <div class="mt-3">
+                <h6>Danh sách thành viên tham gia dự án:</h6>
+                <div class="member-list-scroll">
+                    <ul class="mb-0 ps-3" style="display: flex; gap: 10px; align-items: center;">
+                        <li th:each="tv : ${thanhVienThamGiaDuAn}" style="list-style: none;">
+                            <span style="display: inline-flex; align-items: center; gap: 6px;">
+                                <span style="display: inline-block; width: 32px; height: 32px; background: #2c2177; color: #fff; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold; font-size: 16px;">
+                                    <span th:text="${#strings.substring(tv.idNguoiDung.hoTen,0,1).toUpperCase()}">A</span>
+                                </span>
+                                <span th:text="${tv.idNguoiDung.hoTen}">Tên thành viên</span>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="text-center">
+            <h6>Thống kê báo cáo</h6>
+            <div class="chart-circle mx-auto mb-2 d-flex align-items-center justify-content-center position-relative" style="width: 150px; height: 150px; margin: 0 auto;">
+                <canvas id="reportChart" width="150" height="150"></canvas>
+                <div id="percentText" style="
+                        position: absolute;
+                        font-weight: bold;
+                        font-size: 1.5rem;
+                        pointer-events: none;
+                        user-select: none;
+                    "></div>
+            </div>
+            <div>
+                <span class="badge bg-primary">Đã báo cáo</span>
+                <span class="badge bg-danger">Chưa báo cáo</span>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn btn-outline-primary mb-3">Xuất báo cáo</button>
+
+    <div class="selected-date-box">
+        Ngày: <span id="selectedDate"></span>
+    </div>
+
+    <div class="mb-3 d-flex align-items-center gap-2">
+        <select id="monthSelect" class="form-select w-auto"></select>
+        <select id="yearSelect" class="form-select w-auto"></select>
+    </div>
+
+    <div id="calendarGrid" class="calendar-grid">
+        <!-- Các ô lịch sẽ được tạo bằng JS -->
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="reportModal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-btn" id="closeModal">&times;</span>
+        <h3>Báo cáo công việc ngày: <span id="modalDate"></span></h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Người báo cáo</th>
+                <th>Báo cáo</th>
+                <th>Ngày báo cáo</th>
+                <th>Trạng thái</th>
+            </tr>
+            </thead>
+            <tbody id="modalBody">
+            <!-- Dữ liệu báo cáo sẽ được đổ vào đây -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!--thong bao-->
+<div id="customAlert" style="
+        display: none;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #a1fb9f;  /* Màu xanh Bootstrap */
+        color: #494747;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+        font-weight: 600;
+        font-size: 14px;
+        z-index: 1050;
+        cursor: default;
+        user-select: none;
+        max-width: 320px;
+        pointer-events: auto;
+        transition: opacity 0.3s ease;
+    "></div>
+
+<script>
+    const calendarGrid = document.getElementById("calendarGrid");
+    const monthSelect = document.getElementById("monthSelect");
+    const yearSelect = document.getElementById("yearSelect");
+    const modal = document.getElementById("reportModal");
+    const modalBody = document.getElementById("modalBody");
+    const modalDate = document.getElementById("modalDate");
+    const selectedDateEl = document.getElementById("selectedDate");
+    const closeModalBtn = document.getElementById("closeModal");
+
+    let currentDate = new Date();
+    let currentMonth = currentDate.getMonth();
+    let currentYear = currentDate.getFullYear();
+    let todayDate = currentDate.getDate();
+
+    let chartInstance = null;  // lưu instance chart
+
+    function initSelectors() {
+        for (let i = 0; i < 12; i++) {
+            const option = document.createElement("option");
+            option.value = i;
+            option.textContent = `Tháng ${i + 1}`;
+            if (i === currentMonth) option.selected = true;
+            monthSelect.appendChild(option);
+        }
+
+        const yearNow = currentDate.getFullYear();
+        for (let i = yearNow - 5; i <= yearNow + 5; i++) {
+            const option = document.createElement("option");
+            option.value = i;
+            option.textContent = i;
+            if (i === currentYear) option.selected = true;
+            yearSelect.appendChild(option);
+        }
+
+        monthSelect.addEventListener("change", () => {
+            currentMonth = parseInt(monthSelect.value);
+            generateCalendar(currentMonth, currentYear);
+        });
+
+        yearSelect.addEventListener("change", () => {
+            currentYear = parseInt(yearSelect.value);
+            generateCalendar(currentMonth, currentYear);
+        });
+    }
+
+    function renderPieChart(doneCount, notDoneCount) {
+        const ctx = document.getElementById('reportChart').getContext('2d');
+
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Đã báo cáo', 'Chưa báo cáo'],
+                datasets: [{
+                    data: [doneCount, notDoneCount],
+                    backgroundColor: ['#007bff', '#dc3545'],
+                    hoverOffset: 30
+                }]
+            },
+            options: {
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                }
+            }
+        });
+
+        const total = doneCount + notDoneCount;
+        const percent = total === 0 ? 0 : Math.round((doneCount / total) * 100);
+        document.getElementById('percentText').textContent = `${percent}% đã báo cáo`;
+    }
+
+    function generateCalendar(month, year) {
+        calendarGrid.innerHTML = `
+                <div class="calendar-header-cell">CN</div>
+                <div class="calendar-header-cell">T2</div>
+                <div class="calendar-header-cell">T3</div>
+                <div class="calendar-header-cell">T4</div>
+                <div class="calendar-header-cell">T5</div>
+                <div class="calendar-header-cell">T6</div>
+                <div class="calendar-header-cell">T7</div>
+            `;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement("div");
+            emptyCell.classList.add("calendar-day");
+            calendarGrid.appendChild(emptyCell);
+        }
+
+        const fetchPromises = [];
+        const dateCells = [];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dateCell = document.createElement("div");
+            dateCell.className = "calendar-day";
+
+            dateCells.push({ dateCell, day, dateStr });
+
+            const fetchPromise = fetch(`/quanLy/baoCao/ngay?date=${dateStr}`)
+                .then(res => res.json())
+                .then(data => ({ data, dateStr }));
+
+            fetchPromises.push(fetchPromise);
+        }
+
+        Promise.all(fetchPromises)
+            .then(results => {
+                let doneCount = 0;
+                results.forEach((result, index) => {
+                    const { data, dateStr } = result;
+                    const { dateCell, day } = dateCells[index];
+                    const hasReport = data.length > 0;
+
+                    if (hasReport) {
+                        dateCell.classList.add("has-report");
+                        doneCount++;
+                    }
+
+                    dateCell.innerHTML = `
+                            <div class="calendar-day-box">
+                                <div class="day-number">${day}</div>
+                                ${hasReport ? '<div class="report-status" title="Đã báo cáo">Đã báo cáo</div>' : ''}
+                            </div>
+                        `;
+
+                    const [y, m, d] = dateStr.split("-").map(Number);
+                    dateCell.addEventListener("click", () => showModal(d, m, y));
+                    calendarGrid.appendChild(dateCell);
+
+                    if (day === todayDate && month === currentDate.getMonth() && year === currentDate.getFullYear()) {
+                        setTimeout(() => showModal(day, month + 1, year), 300);
+                    }
+                });
+
+                const notDoneCount = daysInMonth - doneCount;
+                renderPieChart(doneCount, notDoneCount);
+            })
+            .catch(err => console.error("Lỗi khi kiểm tra báo cáo:", err));
+    }
+
+    function showModal(day, month, year) {
+        const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        selectedDateEl.textContent = `${day}/${month}/${year}`;
+        modalDate.textContent = `${day}/${month}/${year}`;
+        modalBody.innerHTML = `<tr><td colspan="4" class="text-center">Đang tải dữ liệu...</td></tr>`;
+        modal.style.display = "flex";
+
+        fetch(`/quanLy/baoCao/ngay?date=${dateStr}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.length === 0) {
+                    modalBody.innerHTML = `<tr><td colspan="4" class="text-center">Chưa có báo cáo</td></tr>`;
+                } else {
+                    modalBody.innerHTML = ""; // Xóa dữ liệu cũ
+
+                    data.forEach(bc => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                        <td>${bc.hoTen || "Không rõ"}</td>
+                        <td>
+                            <p><strong>Hôm nay làm gì:</strong> ${bc.homNayLamGi || ""}</p>
+                            <p><strong>Gặp khó khăn gì:</strong> ${bc.gapKhoKhanGi || ""}</p>
+                            <p><strong>Ngày mai làm gì:</strong> ${bc.ngayMaiLamGi || ""}</p>
+                        </td>
+                        <td><p class="tag">${bc.ngayBaoCao || ""} ${bc.thoiGian || ""}</p></td>
+                        <td><p class="status done">${bc.trangThai ? "Hoàn thành" : "Chưa hoàn thành"}</p></td>
+                    `;
+                        modalBody.appendChild(row);
+                    });
+                }
+            })
+            .catch(() => {
+                modalBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Lỗi tải dữ liệu</td></tr>`;
+            });
+    }
+
+    closeModalBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    modal.addEventListener("click", function(e) {
+        if (e.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+
+    // Khởi tạo
+    initSelectors();
+    generateCalendar(currentMonth, currentYear);
+
+    document.querySelector(".btn.btn-outline-primary").addEventListener("click", () => {
+        const month = currentMonth + 1;
+        const year = currentYear;
+        const url = `/quanLy/baoCao/export?month=${month}&year=${year}`;
+        window.open(url, "_blank");
+    });
+</script>
+</body>
+
+</html>

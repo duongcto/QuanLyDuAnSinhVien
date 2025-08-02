@@ -1,0 +1,502 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Danh sách nhân viên</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <!-- Modal thêm nhân viên -->
+    <div id="overlay"></div>
+    <div id="form_window">
+        <button onclick="toggleForm()" class="btn btn-danger" style="height: auto; width: auto; margin-left: 85%">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-x-square-fill" viewBox="0 0 16 16">
+                <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm3.354 4.646L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708"/>
+            </svg>
+        </button>
+        <h2 style="text-align: center">Thêm nhân viên</h2>
+        <form th:action="@{/saveNhanVien}" th:object="${newND}" method="post" class="form_addNhanVien">
+           <div class="form_top">
+               <div class="form_input">
+                   <input type="hidden" name="trangThai" th:field="*{trangThai}">
+                   <div class="mb-4">
+                       <label class="form-label">Mã nhân viên: </label>
+                       <input type="text" name="maNguoiDung" th:field="*{maNguoiDung}" class="form-control" style="width: 100%;">
+                       <i style="color: red" th:errors="*{maNguoiDung}"></i>
+                   </div>
+                   <div class="mb-4">
+                       <label class="form-label">Họ tên nhân viên: </label>
+                       <input type="text" name="hoTen" th:field="*{hoTen}" class="form-control" style="width: 100%;">
+                       <i style="color: red" th:errors="*{hoTen}"></i>
+                   </div>
+                   <div class="mb-4">
+                       <label class="form-label">Email FE: </label>
+                       <input type="email" name="emailFe" th:field="*{emailFe}" class="form-control" style="width: 100%;">
+                       <i style="color: red" th:errors="*{emailFe}"></i>
+                   </div>
+               </div>
+               <div class="form_input">
+                   <div class="mb-4">
+                       <label class="form-label">Email FPT: </label>
+                       <input type="email" name="emailPt" th:field="*{emailPt}" class="form-control" style="width: 100%;">
+                       <i style="color: red" th:errors="*{emailPt}"></i>
+                   </div>
+                   <div class="mb-4">
+                       <label class="form-label">Số điện thoại: </label>
+                       <input type="text" name="soDienThoai" th:field="*{soDienThoai}" class="form-control" style="width: 100%;">
+                       <i style="color: red" th:errors="*{soDienThoai}"></i>
+                   </div>
+                   <div class="mb-4">
+                       <label class="form-label">Vai trò: </label>
+                       <select name="idVaiTro" th:field="*{idVaiTro}" class="form-control" style="width: 100%;">
+                           <option value="">--Chọn vai trò--</option>
+                           <option th:each="listVT:${listVaiTro}" th:value="${listVT.id}" th:text="${listVT.tenVaiTro}"></option>
+                       </select>
+                       <i style="color: red" th:errors="*{idVaiTro}"></i>
+                   </div>
+               </div>
+           </div>
+            <button type="submit" class="btn btn-success" id="them_nhanVien">Thêm</button>
+        </form>
+    </div>
+
+    <!-- Lọc/Tìm kiếm -->
+    <div class="card filter-section">
+        <div class="card-header">
+            <i class="fas fa-filter me-2"></i> Lọc/Tìm kiếm
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <!-- Tìm kiếm -->
+                <div class="col-md-4">
+                    <label for="tuKhoa" class="form-label">Tìm kiếm</label>
+                    <form th:action="@{/timKiem}" method="get" class="d-flex">
+                        <input type="text" class="form-control me-2" id="tuKhoa" name="tuKhoa" 
+                               placeholder="Nhập từ họ tên, email, số điện thoại!">
+                        <button type="submit" class="btn btn-secondary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Lọc vai trò -->
+                <div class="col-md-4">
+                    <label for="idVaiTro" class="form-label">Lọc vai trò</label>
+                    <form th:action="@{/locVaiTro}" method="get" class="d-flex">
+                        <select class="form-select me-2" id="idVaiTro" name="idVaiTro">
+                            <option value="">Chọn vai trò</option>
+                            <option th:each="listVT:${listVaiTro}" th:value="${listVT.id}" th:text="${listVT.tenVaiTro}"></option>
+                        </select>
+                        <button type="submit" class="btn btn-secondary">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Lọc trạng thái -->
+                <div class="col-md-4">
+                    <label for="trangThai" class="form-label">Lọc trạng thái</label>
+                    <form th:action="@{/locTrangThai}" method="get" class="d-flex">
+                        <select class="form-select me-2" id="trangThai" name="trangThai">
+                            <option value="">Chọn trạng thái</option>
+                            <option value="Đang học">Đang học</option>
+                            <option value="Dừng học">Dừng học</option>
+                        </select>
+                        <button type="submit" class="btn btn-secondary">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Nút hủy -->
+                <div class="col-12">
+                    <a th:href="@{/danhSachNhanVien}" class="btn btn-secondary">
+                        <i class="fas fa-undo"></i> Hủy
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách nhân viên -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-bars me-2"></i> Danh sách nhân viên
+        </div>
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+                <div class="mb-2 mb-md-0">
+                    <p class="mb-0 text-muted">Ngày tạo: <span>01/01/2025</span></p>
+                    <p class="mb-0 text-muted">Ngày cập nhật: <span>01/01/2025</span></p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-warning" onclick="showImportForm()">
+                        <i class="fas fa-upload"></i> Import
+                    </button>
+                    <a th:href="@{/export-headers-excel}" class="btn btn-success">
+                        <i class="fas fa-file-excel"></i> Xuất Excel
+                    </a>
+                    <button class="btn btn-info" onclick="toggleForm()">
+                        <i class="fas fa-plus"></i> Thêm nhân viên
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form import Excel -->
+            <div id="importOverlay" style="display: none;"></div>
+            <div id="importForm" style="display: none;">
+                <form id="excelImportForm" th:action="@{/import-staff}" method="post" enctype="multipart/form-data">
+                    <h4>Import nhân viên</h4>
+                    <div class="mb-3">
+                        <label for="excelFile" class="form-label">Chọn file Excel:</label>
+                        <input type="file" class="form-control" id="excelFile" name="file" accept=".xlsx,.xls" required>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <button type="submit" class="btn btn-primary">Import</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideImportForm()">Đóng</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bảng dữ liệu -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Mã</th>
+                            <th scope="col">Họ & tên</th>
+                            <th scope="col">Email FE</th>
+                            <th scope="col">Email FPT</th>
+                            <th scope="col">SĐT</th>
+                            <th scope="col">Vai trò</th>
+                            <th scope="col">Trạng thái</th>
+                            <th scope="col">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="listNV, iterStat :${listNguoiDung}">
+                            <td th:text="${iterStat.index + 1}">1</td>
+                            <td th:text="${listNV.maNguoiDung}"></td>
+                            <td th:text="${listNV.hoTen}"></td>
+                            <td th:text="${listNV.emailFe}"></td>
+                            <td th:text="${listNV.emailPt}"></td>
+                            <td th:text="${listNV.soDienThoai}"></td>
+                            <td th:text="${listNV.idVaiTro.tenVaiTro}"></td>
+                            <td>
+                                <span class="badge bg-success" th:text="${listNV.trangThai}">
+                                </span>
+                            </td>
+                            <td>
+                                <a th:href="@{/deleteNV/{id}(id=${listNV.id})}" class="btn btn-sm btn-danger me-1" onclick="return confirm('Bạn chắc chắn muốn xóa?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                <form th:action="@{/nhanVien/thayDoiTrangThai}" method="post" style="display:inline-block;">
+                                    <input type="hidden" name="id" th:value="${listNV.id}" />
+                                    <input type="hidden" name="thayDoiTrangThai" th:value="${listNV.trangThai}" />
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phân trang -->
+            <nav aria-label="Pagination" class="pagination-controls mt-4">
+                <ul class="pagination pagination-sm justify-content-end">
+                    <li class="page-item" th:classappend="${trangDau == 0}?'disabled'">
+                        <a class="page-link rounded-circle" th:href="@{/danhSachNhanVien (page=0)}" title="Trang đầu">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item" th:classappend="${trangDau == 0}?'disabled'">
+                        <a class="page-link rounded-circle" th:href="@{/danhSachNhanVien (page=${trangDau - 1})}" title="Trang trước">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link rounded-pill px-3 mx-1" th:text="${trangDau + 1}"></span>
+                    </li>
+                    <li class="page-item" th:classappend="${trangDau + 1 == tongTrang}?'disabled'">
+                        <a class="page-link rounded-circle" th:href="@{/danhSachNhanVien (page=${trangDau + 1})}" title="Trang sau">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item" th:classappend="${trangDau + 1 == tongTrang}?'disabled'">
+                        <a class="page-link rounded-circle" th:href="@{/danhSachNhanVien (page=${tongTrang -1})}" title="Trang cuối">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleForm() {
+        var form = document.getElementById("form_window");
+        var overlay = document.getElementById("overlay");
+
+        var isHidden = (form.style.display === "none" || form.style.display === "");
+
+        form.style.display = isHidden ? "block" : "none";
+        overlay.style.display = isHidden ? "block" : "none";
+    }
+
+    function showImportForm() {
+        document.getElementById('importOverlay').style.display = 'block';
+        document.getElementById('importForm').style.display = 'block';
+    }
+
+    function hideImportForm() {
+        document.getElementById('importOverlay').style.display = 'none';
+        document.getElementById('importForm').style.display = 'none';
+    }
+
+    // Xử lý form submit
+    document.getElementById('excelImportForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+
+        fetch('/import-staff', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                hideImportForm();
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Thành công',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.href = '/danhSachNhanVien';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Lỗi',
+                        text: data.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                hideImportForm();
+                Swal.fire({
+                    title: 'Lỗi',
+                    text: 'Có lỗi xảy ra khi import file',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+    });
+</script>
+<script th:inline="javascript">
+    let error = /*[[${error}]]*/ null;
+    if (error !== null) {
+        Swal.fire({
+            title: 'Thông báo',
+            text: error,
+            icon: 'error',
+            confirmButtonText: 'OK',
+            position: 'top'
+        });
+    }
+
+    let message = /*[[${message}]]*/ null;
+    if (message !== null) {
+        Swal.fire({
+            title: 'Thông báo',
+            text: message,
+            icon: 'success',
+            confirmButtonText: 'OK',
+            position: 'top'
+        });
+    }
+</script>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8f9fa;
+        font-size: 0.875rem;
+    }
+    .container-fluid {
+        padding: 20px;
+    }
+    .card {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+        background-color: #f8f9fa;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 15px 20px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    .filter-section .form-control,
+    .filter-section .form-select {
+        height: calc(1.5em + 0.75rem + 2px);
+        border-radius: 6px;
+    }
+    .table-responsive {
+        margin-top: 20px;
+    }
+    .table thead th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+    .pagination-controls {
+        display: flex;
+        justify-content: flex-end;
+        padding: 20px 0;
+    }
+    .pagination .page-item .page-link {
+        border-radius: 6px;
+        margin: 0 3px;
+        color: #007bff;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    .pagination .page-item .page-link:hover {
+        background-color: #e9ecef;
+        border-color: #007bff;
+    }
+    .pagination .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+    .pagination .page-item.disabled .page-link {
+        color: #6c757d;
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+        cursor: not-allowed;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        border-radius: 6px;
+        padding: 8px 15px;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+    .form-control {
+        font-size: 14px;
+        color: #333;
+    }
+    .badge {
+        border-radius: 12px;
+        padding: 4px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .form-label {
+        font-weight: bold;
+    }
+    
+    /* Filter form styling */
+    .filter-section .d-flex {
+        gap: 0.5rem;
+    }
+    .filter-section .form-control,
+    .filter-section .form-select {
+        flex: 1;
+    }
+    .filter-section .btn-secondary {
+        white-space: nowrap;
+        min-width: 40px;
+    }
+
+    /* Modal styles */
+    #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        z-index: 999;
+    }
+    #form_window {
+        height: 550px;
+        width: 50%;
+        position: fixed;
+        top: 50px;
+        left: 25%;
+        background-color: white;
+        border-radius: 50px;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        padding: 15px;
+    }
+    .form_top{
+        height: 350px;
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+    .form_input{
+        height: 100%;
+        width: 49%;
+    }
+    .form_addNhanVien{
+        height: 80%;
+        width: 100%;
+    }
+    #them_nhanVien{
+        height: auto;
+        width: 90%;
+        margin-left: 5%;
+        margin-top: 15px;
+        border-radius: 50px;
+    }
+    #importOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+    #importForm {
+        position: fixed;
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        width: 400px;
+    }
+</style>
+</body>
+</html>

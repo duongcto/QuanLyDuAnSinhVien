@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chi tiết Người Dùng</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Customizing Tailwind's default font family to use Inter */
+    body {
+      font-family: 'Inter', sans-serif;
+      /* Subtle background color for a light, airy feel */
+      background-color: #f0f2f5;
+      color: #333;
+    }
+
+    /* General styling for form elements */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      /* Hoàn toàn không có viền */
+      border: none;
+      border-radius: 4px; /* Góc bo tròn nhẹ nhàng cho input */
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      transition: all 0.2s ease-in-out;
+      background-color: #ffffff;
+      /* Bóng đổ rất nhẹ để phân biệt input thay vì viền */
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.05); /* Rất tinh tế */
+    }
+
+    /* Focus state for inputs and selects */
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    select:focus {
+      outline: none;
+      /* Bóng đổ focus màu xanh macOS, không viền */
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25), 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Readonly input specific styling */
+    input[readonly] {
+      background-color: #f9f9f9;
+      color: #777;
+      cursor: default;
+      box-shadow: none; /* Không có bóng đổ cho readonly */
+    }
+
+    /* Custom arrow for select dropdowns */
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 1.2em;
+      padding-right: 2.5rem;
+    }
+
+    /* Specific styling for the password input wrapper */
+    .password-input-wrapper {
+      position: relative;
+    }
+
+    .password-toggle-icon {
+      position: absolute;
+      right: 0.75rem; /* Adjust as needed for padding */
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #9ca3af; /* A light gray for the icon */
+      padding-right: 0.5rem; /* Space between icon and text */
+    }
+
+    /* Adjust password input padding to make space for the icon */
+    #detailMatKhau {
+      padding-right: 2px; /* Adjust based on icon size and padding */
+    }
+  </style>
+</head>
+<body class="antialiased">
+<form th:action="@{|/updateSinhVien/${sinhVien.id}|}" method="post">
+  <div class="min-h-screen flex flex-col items-center p-4 sm:p-6 lg:p-8 xl:p-12">
+    <div class="w-full bg-white rounded-lg overflow-hidden
+                /* Bóng đổ rất nhẹ cho card chính, không viền cứng */
+                shadow-[0_1px_20px_rgba(0,0,0,0.04),_0_0_0_1px_rgba(0,0,0,0.01)]
+                max-w-screen-xl">
+      <div class="px-6 py-4">
+        <h2 class="text-xl font-semibold text-gray-800">Chi tiết người dùng</h2>
+      </div>
+
+      <div class="p-6">
+        <input type="hidden" id="detailId" name="id"/>
+
+        <div class="mb-8">
+          <h3 class="text-lg font-medium text-gray-700 pb-3 mb-4">Tài khoản & Cá nhân</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+
+            <div>
+              <label for="detailMaNguoiDung" class="block text-sm font-medium text-gray-600 mb-1">Mã Người Dùng</label>
+              <input type="text" id="detailMaNguoiDung" class="w-full" th:field="*{sinhVien.maNguoiDung}">
+            </div>
+            <div>
+              <label for="detailHoTen" class="block text-sm font-medium text-gray-600 mb-1">Họ Tên</label>
+              <input type="text" id="detailHoTen" class="w-full" th:field="*{sinhVien.hoTen}">
+            </div>
+            <div>
+              <label for="detailTenDangNhap" class="block text-sm font-medium text-gray-600 mb-1">Tên Đăng Nhập</label>
+              <input type="text" id="detailTenDangNhap" class="w-full" th:field="*{sinhVien.tenDangNhap}">
+            </div>
+            <div>
+              <label for="detailSoDienThoai" class="block text-sm font-medium text-gray-600 mb-1">Số Điện Thoại</label>
+              <input type="text" id="detailSoDienThoai" class="w-full" th:field="*{sinhVien.soDienThoai}">
+            </div>
+            <div>
+              <label for="detailEmailPt" class="block text-sm font-medium text-gray-600 mb-1">Email PT</label>
+              <input type="email" id="detailEmailPt" class="w-full" th:field="*{sinhVien.emailPt}">
+            </div>
+            <div>
+              <label for="detailEmailFe" class="block text-sm font-medium text-gray-600 mb-1">Email FE</label>
+              <input type="email" id="detailEmailFe" class="w-full" th:field="*{sinhVien.emailFe}">
+            </div>
+            <div>
+              <label for="detailMatKhau" class="block text-sm font-medium text-gray-600 mb-1">Mật Khẩu</label>
+              <div class="password-input-wrapper">
+                <span class="password-toggle-icon" onclick="togglePasswordVisibility()">
+
+
+                  <svg id="eyeOpen"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  </svg>
+
+
+                  <svg id="eyeClosed" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                  </svg>
+
+                </span>
+                <input type="text" id="detailMatKhau" class="w-full" th:field="*{sinhVien.matKhau}">
+              </div>
+            </div>
+            <div>
+              <label for="detailVaiTro" class="block text-sm font-medium text-gray-600 mb-1">Vai Trò</label>
+              <input type="text" id="detailVaiTro" class="w-full" th:field="*{sinhVien.idVaiTro.tenVaiTro}" readonly>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-medium text-gray-700 pb-3 mb-4">Trạng thái & Thời gian</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            <div>
+              <label for="detailTrangThai" class="block text-sm font-medium text-gray-600 mb-1">Trạng Thái</label>
+              <select id="detailTrangThai" class="w-full" th:field="*{sinhVien.trangThai}">
+                <option value="Đang học" th:selected="${sinhVien.trangThai == 'Đang học'}">Đang học</option>
+                <option value="Dừng học" th:selected="${sinhVien.trangThai == 'Dừng học'}">Dừng học</option>
+              </select>
+            </div>
+            <div>
+              <label for="detailNgayTao" class="block text-sm font-medium text-gray-600 mb-1">Ngày Tạo</label>
+              <input type="text" id="detailNgayTao" class="w-full" th:field="*{sinhVien.ngayTao}" readonly>
+            </div>
+            <div>
+              <label for="detailNgayUpdate" class="block text-sm font-medium text-gray-600 mb-1">Ngày Cập Nhật</label>
+              <input type="text" id="detailNgayUpdate" class="w-full" th:field="*{sinhVien.ngayUpdate}" readonly>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 bg-gray-50 flex justify-end space-x-3">
+        <a type="button" th:href="@{/thoat}" class="px-5 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md
+                                     hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75
+                            
+                                     transition duration-150 ease-in-out">
+          Hủy
+        </a>
+        <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-md
+                                     hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75
+                                     shadow-md hover:shadow-lg transition duration-150 ease-in-out">
+          Lưu thay đổi
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+
+<script>
+  function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('detailMatKhau');
+    const eyeOpenIcon = document.getElementById('eyeOpen');
+    const eyeClosedIcon = document.getElementById('eyeClosed');
+
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      eyeOpenIcon.style.display = 'inline-block';
+      eyeClosedIcon.style.display = 'none';
+    } else {
+      passwordInput.type = 'password';
+      eyeOpenIcon.style.display = 'none';
+      eyeClosedIcon.style.display = 'inline-block';
+    }
+  }
+</script>
+</body>
+</html>

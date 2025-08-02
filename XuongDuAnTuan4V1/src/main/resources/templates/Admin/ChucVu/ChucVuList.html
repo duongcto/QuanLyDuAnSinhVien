@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản lý Chức vụ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container-fluid {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: white;
+            color: #495057;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 15px 20px;
+            border: none;
+        }
+
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .filter-section .card-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #495057;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 15px 20px;
+            border: none;
+        }
+
+        .filter-section .form-control,
+        .filter-section .form-select {
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-section .form-control:focus,
+        .filter-section .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .filter-section .d-flex {
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-section .btn-search-gradient {
+            background: #6c757d;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-section .btn-search-gradient:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .table-responsive {
+            border-radius: 0 0 12px 12px;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            padding: 15px;
+            font-weight: 600;
+            color: #495057;
+            text-align: center;
+        }
+
+        .table tbody td {
+            padding: 12px 15px;
+            vertical-align: middle;
+            text-align: center;
+            border: none;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transition: background-color 0.3s ease;
+        }
+
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: white;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .pagination .page-item .page-link {
+            border-radius: 8px;
+            margin: 0 3px;
+            border: 1px solid #e0e0e0;
+            color: #667eea;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+
+        .pagination .page-item .page-link:hover {
+            background-color: #f8f9fa;
+            border-color: #667eea;
+        }
+
+        .btn-export {
+            background: #28a745;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-import {
+            background: #ffc107;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add {
+            background: #17a2b8;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 2px;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 2px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+
+    <!-- Phần lọc/tìm kiếm -->
+    <div class="card filter-section">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Lọc/Tìm kiếm</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Tên dự án</label>
+                    <form th:action="@{/timKiemChucVu}" method="get" class="d-flex">
+                        <input type="text" class="form-control me-2" name="tuKhoa" 
+                               placeholder="Tìm kiếm theo tên dự án">
+                        <button type="submit" class="btn btn-search-gradient">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="col-md-4">
+                    <label class="form-label">Trạng thái</label>
+                    <form th:action="@{/locChucVuTheoTrangThai}" method="get" class="d-flex">
+                        <select class="form-select me-2" name="trangThai">
+                            <option value="">Chọn trạng thái</option>
+                            <option value="true">Đang hoạt động</option>
+                            <option value="false">Ngừng hoạt động</option>
+                        </select>
+                        <button type="submit" class="btn btn-search-gradient">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Nút hủy -->
+                <div class="col-12">
+                    <button class="btn btn-secondary" onclick="resetForm()">
+                        <i class="fas fa-undo me-2"></i>Hủy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phần danh sách chức vụ -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0"><i class="fas fa-bars me-2"></i>Danh sách chức vụ</h5>
+                <small class="text-muted">Ngày tạo: 01/01/2025 | Ngày cập nhật: 01/01/2025</small>
+            </div>
+            <div class="d-flex gap-2">
+                <a class="btn btn-export" href="/excelChucVu">
+                    <i class="fas fa-file-excel me-2"></i>Xuất Excel
+                </a>
+                <form method="POST" action="/importChucVu" enctype="multipart/form-data" id="importForm" class="d-inline">
+                    <input type="file" id="fileInput" name="file" accept=".xlsx" style="display: none;" required />
+                    <button type="button" class="btn btn-import" onclick="triggerFileInput()">
+                        <i class="fas fa-upload me-2"></i>Import Template
+                    </button>
+                </form>
+                <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#themChucVuModal">
+                    <i class="fas fa-plus me-2"></i>Thêm chức vụ
+                </button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã chức vụ</th>
+                        <th>Tên chức vụ</th>
+                        <th>Mô tả</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="listCV, iterStat :${listCV}">
+                        <td th:text="${iterStat.index + 1}"></td>
+                        <td th:text="${listCV.maChucVu}"></td>
+                        <td th:text="${listCV.tenChucVu}"></td>
+                        <td th:text="${listCV.moTa}"></td>
+                        <td>
+                            <span th:class="${listCV.trangThai ? 'badge bg-success' : 'badge bg-danger'}" 
+                                  th:text="${listCV.trangThai ? 'Đang hoạt động' : 'Ngừng hoạt động'}">
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a th:href="@{/editChucVu/{id}(id=${listCV.idChucVu})}" class="btn btn-info" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a th:href="@{/deleteChucVu/{id}(id=${listCV.idChucVu})}" class="btn btn-danger"
+                                   onclick="return confirm('Bạn chắc chắn muốn xóa?');" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(listCV)}">
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-3"></i>
+                            <br>Không có chức vụ nào.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Phân trang -->
+        <div class="pagination-controls">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end">
+                    <li class="page-item" th:classappend="${trangDau == 0} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/hienThiChucVu(page=0)}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item" th:classappend="${trangDau == 0} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/hienThiChucVu(page=${trangDau - 1})}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link" th:text="${trangDau + 1}"></span>
+                    </li>
+                    <li class="page-item" th:classappend="${trangDau + 1 == tongTrang} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/hienThiChucVu(page=${trangDau + 1})}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item" th:classappend="${trangDau + 1 == tongTrang} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/hienThiChucVu(page=${tongTrang - 1})}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Modal Thêm chức vụ -->
+    <div class="modal fade" id="themChucVuModal" tabindex="-1" aria-labelledby="themChucVuLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="themChucVuLabel">THÊM CHỨC VỤ MỚI</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/addChucVu}" th:object="${newCV}" method="post">
+                        <input type="hidden" name="trangThai" th:field="*{trangThai}">
+                        <input type="hidden" name="idChucVu" th:field="*{idChucVu}">
+                        
+                        <div class="mb-3">
+                            <label for="modalMaChucVu" class="form-label">Mã chức vụ:</label>
+                            <input type="text" class="form-control" id="modalMaChucVu" placeholder="Nhập mã chức vụ" th:field="*{maChucVu}"
+                                   th:classappend="${#fields.hasErrors('maChucVu')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('maChucVu')}" th:errors="*{maChucVu}"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="modalTenChucVu" class="form-label">Tên chức vụ:</label>
+                            <input type="text" class="form-control" id="modalTenChucVu" placeholder="Nhập tên chức vụ" th:field="*{tenChucVu}"
+                                   th:classappend="${#fields.hasErrors('tenChucVu')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('tenChucVu')}" th:errors="*{tenChucVu}"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="modalMoTa" class="form-label">Mô tả:</label>
+                            <textarea class="form-control" id="modalMoTa" placeholder="Nhập mô tả" th:field="*{moTa}"
+                                      th:classappend="${#fields.hasErrors('moTa')} ? 'is-invalid' : ''"></textarea>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('moTa')}" th:errors="*{moTa}"></div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">+ Thêm</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">✘ Quay lại</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Kiểm tra xem có lỗi validation trên newCV hay không
+    var hasErrors = /*[[${#fields.hasErrors('newCV.*')}]]*/ false;
+    // Lấy cờ showAddModal từ Controller
+    var showAddModal = /*[[${showAddModal}]]*/ false;
+
+    if (hasErrors || showAddModal) {
+        document.addEventListener('DOMContentLoaded', function() {
+            var modal = new bootstrap.Modal(document.getElementById('themChucVuModal'));
+            modal.show();
+        });
+    }
+    /*]]>*/
+</script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+        var error = /*[[${error}]]*/ null;
+        if (error !== null) {
+            alert('Lỗi: ' + error);
+        }
+
+        var message = /*[[${message}]]*/ null;
+        if (message !== null) {
+            alert('Thành công: ' + message);
+        }
+    });
+    /*]]>*/
+</script>
+
+<script>
+    function resetForm() {
+        window.location.href = '/hienThiChucVu';
+    }
+
+    function triggerFileInput() {
+        document.getElementById('fileInput').click();
+    }
+
+    // Auto submit form when file is selected
+    document.getElementById('fileInput').addEventListener('change', function() {
+        if (this.files.length > 0) {
+            document.getElementById('importForm').submit();
+        }
+    });
+</script>
+</body>
+</html>

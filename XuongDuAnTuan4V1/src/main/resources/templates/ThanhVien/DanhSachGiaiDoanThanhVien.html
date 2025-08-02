@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Danh Sách Giai Đoạn</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    /* --- Định nghĩa biến CSS cho màu sắc và bóng đổ --- */
+    :root {
+      --primary-color: #4A90E2; /* Xanh dương chủ đạo */
+      --primary-light: #EBF5FF; /* Xanh dương nhạt */
+      --primary-lighter: #F0F8FF; /* Xanh dương rất nhạt cho header card */
+      --secondary-color: #6C757D; /* Xám trung tính */
+      --background-light: #F8F9FA; /* Nền trắng ngà */
+      --text-dark: #212529; /* Màu chữ đậm */
+      --text-medium: #495057; /* Màu chữ trung bình */
+      --text-light: #6C757D; /* Màu chữ nhạt */
+      --border-color: #DEE2E6; /* Màu viền */
+      --shadow-light: rgba(0, 0, 0, 0.05); /* Bóng đổ nhẹ */
+      --shadow-medium: rgba(0, 0, 0, 0.1); /* Bóng đổ trung bình */
+      --success-color: #28A745; /* Màu xanh lá cây cho thành công */
+      --warning-color: #FFC107; /* Màu vàng cho cảnh báo */
+      --danger-color: #DC3545; /* Màu đỏ cho nguy hiểm */
+      --info-color: #17A2B8; /* Màu xanh lam cho thông tin */
+      --gray-light: #E9ECEF; /* Xám nhẹ cho thanh tiến độ nền */
+    }
+
+    /* --- Global Styles --- */
+    body {
+      font-family: 'Inter', sans-serif; /* Sử dụng font Inter cho một cái nhìn hiện đại */
+      background-color: var(--background-light);
+      margin: 0;
+      padding: 20px;
+      color: var(--text-dark);
+      line-height: 1.6; /* Tăng khoảng cách dòng để dễ đọc hơn */
+    }
+
+    .container {
+      max-width: 960px; /* Chiều rộng tối đa cho container chính */
+      margin: auto;
+      background-color: #ffffff;
+      border-radius: 12px; /* Bo góc mềm mại cho container */
+      box-shadow: 0 4px 12px var(--shadow-medium); /* Bóng đổ sâu hơn tạo chiều sâu */
+      padding: 30px; /* Padding lớn hơn */
+    }
+
+    /* --- Filter Section --- */
+    .filter-section {
+      padding: 25px;
+      background-color: #FFFFFF; /* Đã thay đổi thành màu trắng */
+      border-radius: 10px; /* Bo góc */
+      margin-bottom: 30px;
+      border: 1px solid #D1E9FF; /* Viền xanh nhẹ */
+      box-shadow: 0 2px 8px var(--shadow-light); /* Thêm bóng đổ nhẹ cho phần này */
+    }
+
+    .filter-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 1.1em; /* Kích thước tiêu đề */
+    }
+
+    .filter-header i {
+      margin-right: 10px;
+      font-size: 1.3em; /* Kích thước icon lớn hơn */
+    }
+
+    .filter-inputs {
+      display: flex;
+      gap: 20px; /* Khoảng cách giữa các input */
+    }
+
+    .filter-inputs input {
+      flex: 1; /* Chia đều không gian */
+      padding: 12px 18px; /* Padding input lớn hơn */
+      border: 1px solid var(--border-color);
+      border-radius: 8px; /* Bo góc input */
+      font-size: 15px;
+      color: var(--text-medium);
+      transition: all 0.3s ease; /* Hiệu ứng chuyển động mượt mà */
+      box-shadow: inset 0 1px 3px var(--shadow-light); /* Bóng đổ nhẹ bên trong để tạo chiều sâu */
+    }
+
+    .filter-inputs input::placeholder {
+      color: var(--text-light); /* Màu placeholder nhạt hơn */
+    }
+
+    .filter-inputs input:focus {
+      outline: none; /* Bỏ viền outline mặc định */
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.2); /* Vòng sáng khi focus */
+      background-color: #ffffff;
+    }
+
+    .date-input-container {
+      position: relative;
+      flex: 1;
+    }
+
+    .date-input-container input {
+      padding-right: 40px; /* Tạo không gian cho icon */
+    }
+
+    .date-input-container::after {
+      content: "\f4c6"; /* Unicode của icon calendar từ Bootstrap Icons */
+      font-family: "bootstrap-icons"; /* Đảm bảo sử dụng font icon */
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+      pointer-events: none; /* Đảm bảo icon không chặn click */
+      font-size: 1.1em;
+    }
+
+    /* --- Main Content Header (Các giai đoạn) --- */
+    .main-content-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 25px;
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+
+    .main-content-header i {
+      margin-right: 10px;
+      font-size: 1.3em;
+    }
+
+    /* --- Stage Card --- */
+    .stage-card {
+      background-color: #ffffff;
+      border: 1px solid #E0E0E0;
+      border-radius: 10px; /* Bo góc nhẹ hơn container chính */
+      margin-bottom: 20px;
+      overflow: hidden; /* Đảm bảo nội dung không tràn ra ngoài bo góc */
+      box-shadow: 0 2px 8px var(--shadow-light); /* Bóng đổ nhẹ */
+      transition: all 0.2s ease-in-out; /* Hiệu ứng chuyển động khi hover */
+    }
+
+    .stage-card:hover {
+      border-color: var(--primary-color); /* Viền màu xanh khi hover */
+      box-shadow: 0 6px 16px var(--shadow-medium); /* Bóng đổ rõ hơn */
+      transform: translateY(-3px); /* Nhấc nhẹ card lên */
+    }
+
+    .stage-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 25px;
+      background-color: var(--primary-lighter); /* Nền xanh rất nhạt cho header */
+      border-bottom: 1px solid #D5E7F7; /* Viền đậm hơn */
+      cursor: pointer;
+      position: relative;
+      user-select: none; /* Ngăn người dùng chọn văn bản khi click để toggle */
+    }
+
+    .stage-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-grow: 1;
+    }
+
+    .stage-header-left .toggle-icon {
+      font-size: 1.3em;
+      color: var(--text-light);
+      transition: transform 0.2s; /* Hiệu ứng xoay mũi tên */
+    }
+    .stage-header.expanded .toggle-icon {
+      transform: rotate(90deg); /* Xoay mũi tên khi mở rộng */
+    }
+
+    .stage-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .stage-meta {
+      font-size: 13px;
+      color: var(--text-medium);
+      margin-left: 15px;
+    }
+
+    .stage-header-right button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Bóng đổ nhẹ cho nút */
+    }
+
+    .stage-header-right button:hover {
+      background-color: #3A7CCF; /* Màu xanh đậm hơn khi hover */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15); /* Bóng đổ rõ hơn */
+    }
+
+    .stage-content {
+      display: none; /* Ẩn mặc định */
+      padding: 20px 25px;
+      background-color: #FDFDFD; /* Nền trắng gần như tinh khiết cho nội dung */
+    }
+    .stage-header.expanded + .stage-content {
+      display: block; /* Hiện khi header có class 'expanded' */
+    }
+
+    /* --- Task Item inside Stage Content --- */
+    .task-item-in-stage {
+      background-color: #ffffff;
+      border: 1px solid #E6E6E6;
+      border-radius: 8px;
+      padding: 15px 20px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 1px 4px var(--shadow-light);
+      transition: all 0.2s ease-in-out;
+      cursor: pointer; /* Biểu thị rằng có thể click để mở chi tiết */
+    }
+    .task-item-in-stage:last-child {
+      margin-bottom: 0; /* Bỏ margin dưới cho phần tử cuối cùng */
+    }
+    .task-item-in-stage:hover {
+      border-color: #A2D2FF; /* Màu viền khi hover */
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08); /* Bóng đổ rõ hơn */
+      transform: translateY(-2px); /* Nhấc nhẹ task lên */
+    }
+
+    .task-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-dark);
+      margin-bottom: 10px;
+    }
+
+    .task-meta-in-stage {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-medium);
+      margin-bottom: 10px;
+    }
+
+    .task-progress-bar-container {
+      background: var(--gray-light); /* Màu nền thanh tiến độ */
+      border-radius: 4px;
+      height: 7px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .task-progress-bar-fill {
+      background: var(--primary-color);
+      height: 100%;
+      width: 0%; /* Sẽ được set bằng JS hoặc dữ liệu động */
+      border-radius: 4px;
+      transition: width 0.5s ease-out; /* Hiệu ứng động cho thanh tiến độ */
+    }
+
+    .task-progress-percentage {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 8px;
+      text-align: right; /* Căn phải phần trăm */
+      font-weight: 500;
+    }
+
+    .task-priority-tag {
+      position: absolute;
+      top: 15px;
+      right: 18px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08); /* Bóng đổ nhẹ cho tag */
+    }
+
+    /* Colors for priority tags (thêm màu cho "Gấp" nếu cần) */
+    .priority-cao {
+      background-color: #E6FFED; /* Xanh lá nhạt */
+      color: var(--success-color); /* Xanh lá đậm */
+    }
+    .priority-trung-binh {
+      background-color: #FFF3CD; /* Vàng nhạt */
+      color: #FFA500; /* Cam đậm */
+    }
+    .priority-thap {
+      background-color: #E0F2F7; /* Xanh lam nhạt */
+      color: var(--info-color); /* Xanh lam đậm */
+    }
+    .priority-gap { /* Thêm màu cho độ ưu tiên "Gấp" nếu có */
+      background-color: #F8D7DA; /* Đỏ nhạt */
+      color: var(--danger-color); /* Đỏ đậm */
+    }
+
+    /* --- Responsive adjustments --- */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px; /* Giảm padding tổng thể trên mobile */
+      }
+      .container {
+        padding: 15px;
+        border-radius: 8px; /* Bo góc ít hơn trên mobile */
+        box-shadow: 0 2px 8px var(--shadow-medium);
+      }
+      .filter-inputs {
+        flex-direction: column; /* Xếp input theo chiều dọc trên mobile */
+        gap: 15px;
+      }
+      .filter-section, .stage-card {
+        padding: 15px; /* Giảm padding */
+      }
+      .stage-header {
+        flex-direction: column; /* Xếp header theo chiều dọc */
+        align-items: flex-start;
+        gap: 10px;
+        padding: 15px 20px;
+      }
+      .stage-header-right {
+        width: 100%;
+        text-align: center;
+      }
+      .stage-header-right button {
+        width: 100%; /* Nút chiếm toàn bộ chiều rộng */
+      }
+      .stage-title {
+        font-size: 16px;
+      }
+      .stage-meta {
+        margin-left: 0; /* Xóa margin-left để căn trái */
+        font-size: 12px;
+      }
+      .stage-content {
+        padding: 15px 20px;
+      }
+      .task-item-in-stage {
+        padding: 12px 15px;
+      }
+      .task-priority-tag {
+        position: static; /* Đặt lại vị trí */
+        margin-top: 8px;
+        margin-left: auto; /* Đẩy tag sang phải trong flex column */
+      }
+      .task-title {
+        margin-bottom: 5px;
+      }
+      .task-meta-in-stage {
+        flex-direction: column; /* Xếp meta info theo chiều dọc */
+        align-items: flex-start;
+        margin-bottom: 5px;
+      }
+    }
+    /*.stage-content {*/
+    /*  display: none;*/
+    /*}*/
+
+    /* Form chi tiết công việc - modal chính */
+    .formCongViecChiTiet {
+      display: flex;
+      width: 820px;
+      gap: 20px;
+      padding: 20px;
+      background: #f4f5f7;
+      font-family: sans-serif;
+
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+
+    .main-content, .sidebar {
+      background: #fff; padding: 20px; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);cursor: not-allowed;
+    }
+    .main-content { flex-grow: 1; cursor: not-allowed;}
+    .sidebar { width: 250px; cursor: not-allowed;}
+    h3 { margin-top: 0; color: #5e6c84; display: flex; align-items: center; gap: 8px; cursor: not-allowed;}
+    button { border: 1px dashed #ccc; background: #f4f5f7; padding: 5px 10px; border-radius: 3px; margin-right: 5px; cursor: not-allowed;}
+    .priority-group { display: flex; align-items: center; gap: 5px; cursor: not-allowed;}
+    .priority-group .current-priority { background: #dfe1e6; padding: 5px 10px; border-radius: 3px; cursor: not-allowed;}
+    textarea { width: 100%; min-height: 60px; border: 1px solid #ccc; border-radius: 3px; padding: 8px; box-sizing: border-box; cursor: not-allowed;}
+    .progress-bar-container { background: #dfe1e6; border-radius: 3px; height: 8px; margin-bottom: 10px; overflow: hidden; cursor: not-allowed;}
+    .progress-bar { background: #0079bf; height: 100%; width: 0; cursor: not-allowed;}
+    .add-button { background: #0079bf; color: #fff; border: none; padding: 8px 15px; border-radius: 3px; cursor: not-allowed;}
+    .add-button:hover { background: #0052cc; cursor: not-allowed;}
+    .sidebar-item { display: flex; align-items: center; padding: 8px 12px; margin-bottom: 8px; background: #f4f5f7; border-radius: 3px; cursor: not-allowed;}
+    .sidebar-item:hover { background: #e1e4e8; cursor: not-allowed;}
+    .comment-box { display: flex; gap: 10px; align-items: flex-start; cursor: not-allowed;}
+    .avatar { width: 32px; height: 32px; background: #ccc; border-radius: 50%; cursor: not-allowed;}
+    .comment-input { flex-grow: 1; position: relative; cursor: not-allowed;}
+    .send-icon { position: absolute; right: 10px; bottom: 10px; color: #5e6c84; cursor: not-allowed;}
+    .toggle-details { color: #5e6c84;  font-size: 0.9em; cursor: not-allowed;}
+    .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #5e6c84; cursor: not-allowed;}
+    .doUuTien{cursor: not-allowed;pointer-events: none;}
+    .close-btn { cursor: pointer; font-size: 1.2em; }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="filter-section">
+    <div class="filter-header">
+      <i class="bi bi-funnel"></i> Bộ lọc
+    </div>
+    <div class="filter-inputs">
+      <input type="text" id="tenGiaiDoanInput" placeholder="Nhập tên giai đoạn">
+      <div class="date-input-container">
+        <input type="date" id="ngayBatDauInput">
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content-header">
+    <i class="bi bi-collection"></i> Các giai đoạn
+  </div>
+
+  <div id="stage-list" th:fragment="stageList">
+    <div class="stage-card" th:each="gd : ${dsGiaiDoanThanhVien}">
+      <div class="stage-header" id="stageHeader1">
+        <div class="stage-header-left">
+          <i class="bi bi-chevron-right toggle-icon"></i>
+          <span class="stage-title" th:text="${gd.tenGiaiDoan}">Giai đoạn 1</span>
+          <span class="stage-meta" th:text="${gd.ngayBatDau} + ' - ' + ${gd.ngayKetThuc}">>22/05/2025 - 29/05/2025</span>
+          <span class="stage-meta">(10 công việc)</span>
+        </div>
+        <div class="stage-header-right">
+          <button>Chi tiết</button>
+        </div>
+      </div>
+      <div class="stage-content" id="stageContent1">
+        <div th:if="${dsCongViecTheoDuAnThanhVien[gd.id] != null}">
+          <div class="task-item-in-stage"
+               th:each="cv : ${dsCongViecTheoDuAnThanhVien[gd.id]}">
+              <span class="task-priority-tag" th:classappend="${'priority-' + cv.doUuTien.toLowerCase().replace(' ', '-')}" th:text="${cv.doUuTien}">Cao</span>
+
+              <div class="task-actions"> <a th:href="@{/detailThanhVien/{id}(id=${cv.id}, idDuAn=${idDuAn})}" style="text-decoration: none; color: inherit;">
+                <i class="bi bi-pencil-square"></i>
+              </a>
+              </div>
+              <span class="task-title" th:text="${cv.tenCongViec}">Thiết kế sơ đồ phân rã các chức năng</span>
+
+              <div class="task-meta-in-stage">
+                <span th:text="${cv.ngayHetHan}">Hạn: 25/05/2025</span>
+              </div>
+
+              <div class="task-progress-bar-container">
+                <div class="task-progress-bar-fill" style="width: 0%;"></div>
+              </div>
+              <span class="task-progress-percentage">Tiến độ: 0%</span>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div th:if="${congViecChiTiet != null}">
+  <div id="formChiTiet"
+       data-task-id="[[${congViecChiTiet.id}]]"
+       class="formCongViecChiTiet"
+       th:style="${openModal} ? 'display:flex;' : 'display:none;'">
+    <div class="main-content" th:object="${congViecChiTiet}">
+      <h1 th:text="*{tenCongViec}">Code giao diện</h1>
+
+      <div style="display:flex; gap:20px; align-items:center; margin-bottom:20px;">
+        <div>🔖
+          <button><span class="icon" th:text="*{nhanDan}"></span></button>
+          <button><span class="icon">+</span> Thành viên</button>
+        </div>
+        <div class="priority-group">
+          <span>Độ ưu tiên:</span>
+          <form th:action="@{/update-cong-viec-do-uu-tien}" method="post">
+            <input type="hidden" name="idDuAn" th:value="${idDuAn}" />
+            <input type="hidden" name="id" th:value="${congViecChiTiet.id}" />
+            <select class="doUuTien" name="doUuTien" onchange="this.form.submit()">
+              <option value="Quan trọng" th:selected="${congViecChiTiet.doUuTien == 'Quan trọng'}">💡 Quan trọng</option>
+              <option value="Cao" th:selected="${congViecChiTiet.doUuTien == 'Cao'}">🔥 Cao</option>
+              <option value="Trung bình" th:selected="${congViecChiTiet.doUuTien == 'Trung bình'}">🛡️ Trung bình</option>
+              <option value="Thấp" th:selected="${congViecChiTiet.doUuTien == 'Thấp'}">⬇️ Thấp</option>
+            </select>
+          </form>
+
+        </div>
+
+      </div>
+      <div>Kiểu công việc: <span th:text="${congViecChiTiet.kieuCv}"></span></div>
+      <div class="form-section">
+        <form th:action="@{/update-mo-ta}" method="post">
+          <input type="hidden" name="idDuAn" th:value="${idDuAn}" />
+          <input type="hidden" name="id" th:value="${congViecChiTiet.id}" />
+
+          <h3><span class="icon">📄</span> Mô tả</h3>
+          <textarea id="moTaTextarea"
+                    placeholder="Thêm mô tả..."
+                    onfocus="hienNutLuu()"
+                    name="moTa"
+                    th:text="${congViecChiTiet.moTa}"></textarea>
+
+          <button id="nutLuuMoTa" class="add-button" type="submit" style="display: none;">
+            Lưu
+          </button>
+        </form>
+      </div>
+
+
+      <div class="form-section">
+        <h3><span class="icon">☑️</span> Những việc cần làm</h3>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+          <span>0%</span>
+          <div class="progress-bar-container" style="flex-grow:1;">
+            <div class="progress-bar"></div>
+          </div>
+        </div>
+        <button class="add-button">+ Thêm</button>
+      </div>
+      <div class="form-section">
+        <div style="text-align: center;">
+          <img th:src="@{'/uploads/' + ${congViecChiTiet.taiAnh}}" alt="Ảnh sản phẩm" width="300px" style="padding: 10px;"/>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3><span class="icon">💬</span> Bình luận</h3>
+          <span class="toggle-details">Hiển thị Chi tiết</span>
+        </div>
+        <div class="comment-box">
+          <div class="avatar"></div>
+          <div class="comment-input">
+            <textarea placeholder="Viết bình luận... nhập @ để nhắc tới ai đó"></textarea>
+            <span class="send-icon">➢</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3><span class="icon">⏱️</span> Hoạt động</h3>
+          <span class="toggle-details">Xem đầy đủ</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h4>Thêm vào thẻ</h4>
+        <span class="close-btn" onclick="anFormChiTiet()">
+                        ×
+                    </span>
+      </div>
+      <ul>
+        <li class="sidebar-item"><span class="icon">👤</span> Thành viên</li>
+        <li class="sidebar-item" id="kieuCVButton"><span class="icon">🏷️</span> Kiểu công việc</li>
+        <li class="sidebar-item" id="nhanButton"><span class="icon">🔖</span> Nhãn</li>
+        <li class="sidebar-item" id="ngayHanButton"><span class="icon">📅</span> Ngày hạn</li>
+        <li class="sidebar-item" id="anhButton"><span class="icon">⤒` </span>  Tải ảnh lên</li>
+        <li class="sidebar-item" id="linkButton"><span class="icon">🔗</span> Link đính kèm</li>
+      </ul>
+    </div>
+  </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script th:inline="javascript">
+  const idDuAn = [[${idDuAn}]];
+</script>
+<script>
+  function ganSuKienToggle() {
+    const headers = document.querySelectorAll('.stage-header');
+    headers.forEach(header => {
+      header.addEventListener('click', function () {
+        const content = this.nextElementSibling;
+        const icon = this.querySelector('.toggle-icon');
+
+        const isVisible = content.style.display === 'block';
+        content.style.display = isVisible ? 'none' : 'block';
+
+        icon.classList.toggle('bi-chevron-right', isVisible);
+        icon.classList.toggle('bi-chevron-down', !isVisible);
+      });
+    });
+  }
+
+  function searchGiaiDoan() {
+    const ten = document.getElementById("tenGiaiDoanInput").value;
+    const ngay = document.getElementById("ngayBatDauInput").value;
+
+    const params = new URLSearchParams();
+    params.append("idDuAn", idDuAn);
+    if (ten) params.append("tenGiaiDoan", ten);
+    if (ngay) params.append("ngayBatDau", ngay);
+
+    fetch(`/search-giai-doan?${params.toString()}`)
+            .then(res => res.text())
+            .then(html => {
+              document.getElementById("stage-list").innerHTML = html;
+              ganSuKienToggle(); // 🔁 Gán lại toggle sau khi load fragment mới
+            });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    ganSuKienToggle(); // ✅ Gán ban đầu
+
+    document.getElementById("tenGiaiDoanInput").addEventListener("input", searchGiaiDoan);
+    document.getElementById("ngayBatDauInput").addEventListener("change", searchGiaiDoan);
+  });
+
+  function anFormChiTiet() {
+    const form = document.getElementById('formChiTiet');
+    if (form) {
+      form.style.display = 'none';
+    }
+  }
+</script>
+</body>
+</html>

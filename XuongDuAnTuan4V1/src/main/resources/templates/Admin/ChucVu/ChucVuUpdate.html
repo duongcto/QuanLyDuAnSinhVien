@@ -1,0 +1,90 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Danh sách nhân viên</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" th:herf="@{/css/Bootstrap.min.css}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Thư viện alert đẹp -->
+</head>
+<body>
+<div class="content_chucVu">
+        <h2 style="text-align: center">Update chức vụ</h2>
+        <form th:action="@{/updateChucVu}" th:object="${newCV}" method="post" class="form_updateChucVu">
+            <div class="form_top">
+                <input type="hidden" name="idChucVu" th:field="*{idChucVu}">
+                <input type="hidden" name="maChucVu" th:field="*{maChucVu}">
+                <div class="mb-4">
+                    <label class="form-label">Tên chức vụ: </label>
+                    <input type="text" name="tenChucVu" th:field="*{tenChucVu}" class="form-control" style="width: 100%;">
+                    <i style="color: red" th:errors="*{tenChucVu}"></i>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Mô tả: </label>
+                    <textarea type="text" name="moTa" th:field="*{moTa}" class="form-control" style="width: 100%;"></textarea>
+                    <i style="color: red" th:errors="*{moTa}"></i>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Trạng thái: </label>
+                    <select name="trangThai" th:field="*{trangThai}" class="form-control">
+                        <option value="true">Đang hoạt động</option>
+                        <option value="false">Ngừng hoạt động</option>
+                    </select>
+                    <i style="color: red" th:errors="*{trangThai}"></i>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success" id="update_nhanVien">update</button>
+        </form>
+</div>
+<script th:inline="javascript">
+    let error = /*[[${error}]]*/ null;
+    if (error !== null) {
+        Swal.fire({
+            title: 'Thông báo',
+            text: error,
+            icon: 'error',
+            confirmButtonText: 'OK',
+            position: 'top'
+        });
+    }
+
+    let message = /*[[${message}]]*/ null;
+    if (message !== null) {
+        Swal.fire({
+            title: 'Thông báo',
+            text: message,
+            icon: 'success',
+            confirmButtonText: 'OK',
+            position: 'top'
+        });
+    }
+</script>
+</body>
+</html>
+<style>
+    *{
+        margin: 0px;
+        padding: 0px;
+        box-sizing: border-box;
+    }
+    .content_chucVu{
+        height: 1000px;
+        width: 100%;
+        padding-top: 5%;
+    }
+
+    .form-control{
+        height: auto;
+        width: 80%;
+    }
+    .form_top{
+        height: 350px;
+        width: 100%;
+    }
+    .form_updateChucVu{
+        height: 500px;
+        width: 40%;
+        margin-left: 30%;
+    }
+</style>

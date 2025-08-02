@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Dự án</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9fa;
+      font-size: 0.875rem;
+    }
+    .container-fluid {
+      padding: 20px;
+    }
+    .card {
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    .card-header {
+      background-color: #fff;
+      border-bottom: 1px solid #dee2e6;
+      padding: 15px 20px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+    .filter-section .form-control,
+    .filter-section .form-select {
+      height: calc(1.5em + 0.75rem + 2px);
+      border-radius: 6px;
+    }
+    .table-responsive {
+      margin-top: 20px;
+    }
+    .table thead th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+    .pagination-controls {
+      display: flex;
+      justify-content: flex-end;
+      padding: 20px 0;
+    }
+    .pagination .page-item .page-link {
+      border-radius: 6px;
+      margin: 0 3px;
+      color: #007bff;
+      border: 1px solid #dee2e6;
+      transition: all 0.3s ease;
+    }
+    .pagination .page-item .page-link:hover {
+      background-color: #e9ecef;
+      border-color: #007bff;
+    }
+    .pagination .page-item.active .page-link {
+      background-color: #007bff;
+      border-color: #007bff;
+      color: white;
+      font-weight: bold;
+    }
+    .pagination .page-item.disabled .page-link {
+      color: #6c757d;
+      background-color: #e9ecef;
+      border-color: #dee2e6;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+      border-radius: 6px;
+      padding: 8px 15px;
+    }
+    .btn-primary:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+    .form-control {
+      font-size: 14px;
+      color: #333;
+    }
+    .status-badge {
+      border-radius: 12px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .status-active {
+      border: 1px solid #28a745;
+      color: #28a745;
+    }
+    .status-inactive {
+      border: 1px solid #dc3545;
+      color: #dc3545;
+    }
+    .status-progress {
+      border: 1px solid #007bff;
+      color: #007bff;
+    }
+    .status-completed {
+      border: 1px solid #6c757d;
+      color: #6c757d;
+    }
+    option select {
+      font-size: 12px;
+    }
+    .form-label {
+      font-weight: bold;
+    }
+    .errors {
+      color: red;
+      font-weight: initial;
+    }
+    .btn-custom-gradient {
+      border: none;
+      transition: all 0.3s ease;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-custom-gradient:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transform: translateY(-1px);
+    }
+    .btn-custom-gradient i {
+      margin-right: 8px;
+      font-size: 1rem;
+    }
+    .btn-export {
+      background-image: linear-gradient(to right, #28a745, #1e7e34);
+    }
+    .btn-export:hover {
+      background-image: linear-gradient(to right, #1e7e34, #28a745);
+    }
+    .btn-import {
+      background-image: linear-gradient(to right, #ffc107, #d39e00);
+      color: #333;
+    }
+    .btn-import:hover {
+      background-image: linear-gradient(to right, #d39e00, #ffc107);
+    }
+    .btn-add {
+      background-image: linear-gradient(to right, #17a2b8, #117a8b);
+    }
+    .btn-add:hover {
+      background-image: linear-gradient(to right, #117a8b, #17a2b8);
+    }
+    .btn-search-gradient {
+      background-image: linear-gradient(to right, #6c757d, #5a6268);
+      border: none;
+      transition: all 0.3s ease;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-search-gradient:hover {
+      background-image: linear-gradient(to right, #5a6268, #6c7568);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid">
+
+<!--  lọc-->
+  <div class="card filter-section">
+    <div class="card-header">
+      <i class="fas fa-filter me-2"></i> Lọc/Tìm kiếm
+    </div>
+    <div class="card-body">
+      <form class="row g-3 align-items-end" th:action="@{/admin/du-an/tim-kiem}" method="get">
+        <div class="col-md-4">
+          <label for="tenDuAn" class="form-label">Tên dự án</label>
+          <input type="text" class="form-control" id="tenDuAn" name="tenDuAn"
+                 th:value="${tenDuAn}" placeholder="Tìm kiếm theo tên dự án">
+        </div>
+        <div class="col-md-4" style="font-size: 14px">
+          <label for="trangThai" class="form-label">Trạng thái</label>
+          <select style="font-size: 14px" class="form-select" id="trangThai" name="trangThai">
+            <option style="font-size: 14px" value="">Chọn trạng thái</option>
+            <option style="font-size: 14px" value="active" th:selected="${trangThai == 'active'}">Đang diễn ra</option>
+            <option style="font-size: 14px" value="inactive" th:selected="${trangThai == 'inactive'}">Chưa hoạt động</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <button type="submit" class="btn btn-search-gradient">
+            <i class="fa-brands fa-searchengin"></i> Lọc
+          </button>
+          <a th:href="@{/admin/du-an}" class="btn btn-search-gradient">
+            <i class="fa-solid fa-spinner"></i> Hủy
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <div class="card">
+    <div class="card-header">
+      <i class="fas fa-list-ul me-2"></i> Danh sách dự án
+    </div>
+<!--    chức năng-->
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <div class="mb-2 mb-md-0">
+          <p class="mb-0 text-body-secondary">Ngày tạo: <span>01/01/2025</span></p>
+          <p class="mb-0 text-body-secondary">Ngày cập nhật: <span>01/01/2025</span></p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <a type="button" class="btn btn-custom-gradient btn-export" th:href="@{/admin/du-an/export-excel}">
+            <i class="fas fa-file-excel"></i> Xuất Excel
+          </a>
+          <form th:action="@{/admin/du-an/import-excel}" method="post" enctype="multipart/form-data" class="d-inline">
+            <input type="file" name="file" accept=".xlsx,.xls" style="display: none;" id="importFile" onchange="this.form.submit()">
+            <button type="button" class="btn btn-custom-gradient btn-import" onclick="document.getElementById('importFile').click();">
+              <i class="fas fa-upload"></i> Import Template
+            </button>
+          </form>
+          <a type="button" class="btn btn-custom-gradient btn-add" data-bs-toggle="modal" data-bs-target="#addDuAnModal">
+            <i class="fas fa-plus-circle"></i> Thêm dự án
+          </a>
+        </div>
+      </div>
+
+<!--      table chứa dữ liệu-->
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Mã dự án</th>
+            <th scope="col">Tên dự án</th>
+            <th scope="col">Ngày bắt đầu</th>
+            <th scope="col">Ngày kết thúc</th>
+            <th scope="col">Chuyên ngành</th>
+            <th scope="col">Tiến độ</th>
+            <th scope="col">Trạng thái</th>
+            <th scope="col">Hành động</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="da,stat : ${pageDuAn}">
+            <td th:text="${stat.index + 1}"></td>
+            <td th:text="${da.maDuAn}"></td>
+            <td th:text="${da.tenDuAn}"></td>
+            <td><span class="status-badge status-progress" th:text="${da.ngayBatDau}"></span></td>
+            <td><span class="status-badge status-inactive" th:text="${da.ngayKetThuc}"></span></td>
+            <td th:text="${da.chuyenNganh}"></td>
+            <td th:text="${da.tienDo}"></td>
+            <td>
+              <span class="status-badge"
+                    th:classappend="${da.trangThai} ? 'status-active' : 'status-completed'"
+                    th:text="${da.trangThai ? 'Đang diễn ra' : 'Chưa diễn ra'}">
+              </span>
+            </td>
+            <td>
+              <a th:href="@{/admin/du-an/hien-thi-cap-nhat/{id}(id=${da.id})}" class="btn btn-sm btn-info me-1">
+                <i class="fas fa-edit"></i>
+              </a>
+              <a th:href="@{/admin/du-an/{id}(id=${da.id})}" class="btn btn-sm btn-danger btn-delete">
+                <i class="fas fa-trash-alt"></i>
+              </a>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+<!--      phân trang-->
+      <nav aria-label="Pagination" class="pagination-controls mt-4">
+        <ul class="pagination pagination-sm justify-content-end">
+          <li class="page-item" th:classappend="${pageDuAn.first} ? 'disabled'">
+            <a class="page-link rounded-circle" th:href="@{/admin/du-an/tim-kiem(page=0, tenDuAn=${tenDuAn}, trangThai=${trangThai})}" title="Trang đầu">
+              <i class="fas fa-angle-double-left"></i>
+            </a>
+          </li>
+          <li class="page-item" th:classappend="${pageDuAn.first} ? 'disabled'">
+            <a class="page-link rounded-circle" th:href="@{/admin/du-an/tim-kiem(page=${pageDuAn.number - 1}, tenDuAn=${tenDuAn}, trangThai=${trangThai})}" title="Trang trước">
+              <i class="fas fa-angle-left"></i>
+            </a>
+          </li>
+          <li class="page-item"
+              th:each="i : ${#numbers.sequence(0, pageDuAn.totalPages - 1)}"
+              th:classappend="${i == pageDuAn.number} ? 'active'">
+            <a class="page-link rounded-pill px-3 mx-1"
+               th:href="@{/admin/du-an/tim-kiem(page=${i}, tenDuAn=${tenDuAn}, trangThai=${trangThai})}"
+               th:text="${i + 1}"></a>
+          </li>
+          <li class="page-item" th:classappend="${pageDuAn.last} ? 'disabled'">
+            <a class="page-link rounded-circle" th:href="@{/admin/du-an/tim-kiem(page=${pageDuAn.number + 1}, tenDuAn=${tenDuAn}, trangThai=${trangThai})}" title="Trang sau">
+              <i class="fas fa-angle-right"></i>
+            </a>
+          </li>
+          <li class="page-item" th:classappend="${pageDuAn.last} ? 'disabled'">
+            <a class="page-link rounded-circle" th:href="@{/admin/du-an/tim-kiem(page=${pageDuAn.totalPages - 1}, tenDuAn=${tenDuAn}, trangThai=${trangThai})}" title="Trang cuối">
+              <i class="fas fa-angle-double-right"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!--modal update-->
+<div class="modal fade" id="updateDuAnModal" tabindex="-1" aria-labelledby="updateDuAnModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-lg">
+      <div class="modal-header">
+        <h5 class="modal-title" id="updateDuAnModalLabel">Cập nhật dự án</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                onclick="window.location.href='/admin/du-an'"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="updateDuAnForm"
+              th:action="@{/admin/du-an/update/{id}(id=${updateDuAn.id})}"
+              method="post"
+              th:object="${updateDuAn}">
+
+          <!-- ID & Mã Dự Án (ẩn) -->
+          <input type="hidden" th:field="*{id}" />
+          <input type="hidden" th:field="*{maDuAn}" />
+
+          <!-- Tên dự án -->
+          <div class="mb-3">
+            <label class="form-label">Tên dự án</label><span style="color: red">*</span>
+            <input type="text" class="form-control" th:field="*{tenDuAn}" placeholder="Nhập tên dự án" />
+            <div class="errors text-danger" th:if="${#fields.hasErrors('tenDuAn')}" th:errors="*{tenDuAn}"></div>
+          </div>
+
+          <!-- Ngày bắt đầu -->
+          <div class="mb-3">
+            <label class="form-label">Ngày bắt đầu</label><span style="color: red">*</span>
+            <input type="date" class="form-control" th:field="*{ngayBatDau}" />
+            <div class="errors text-danger" th:if="${#fields.hasErrors('ngayBatDau')}" th:errors="*{ngayBatDau}"></div>
+          </div>
+
+          <!-- Ngày kết thúc -->
+          <div class="mb-3">
+            <label class="form-label">Ngày kết thúc</label><span style="color: red">*</span>
+            <input type="date" class="form-control" th:field="*{ngayKetThucDuKien}" />
+            <div class="errors text-danger" th:if="${#fields.hasErrors('ngayKetThucDuKien')}" th:errors="*{ngayKetThucDuKien}"></div>
+          </div>
+
+          <!-- Cơ sở -->
+          <div class="mb-3">
+            <label class="form-label">Cơ sở</label><span style="color: red">*</span>
+            <select style="font-size: 14px" class="form-select" th:field="*{idCoSo}">
+              <option value="">Chọn cơ sở</option>
+              <option style="font-size: 14px" th:each="cs : ${listCs}" th:value="${cs.id}" th:text="${cs.tenCoSo}"></option>
+            </select>
+            <div class="errors text-danger" th:if="${#fields.hasErrors('idCoSo')}" th:errors="*{idCoSo}"></div>
+          </div>
+
+          <!-- Bộ môn -->
+          <div class="mb-3">
+            <label class="form-label">Bộ môn</label><span style="color: red">*</span>
+            <select style="font-size: 14px" class="form-select" th:field="*{idBoMon}">
+              <option value="">Chọn bộ môn</option>
+              <option style="font-size: 14px" th:each="bm : ${listBm}" th:value="${bm.id}" th:text="${bm.tenBoMon}"></option>
+            </select>
+            <div class="errors text-danger" th:if="${#fields.hasErrors('idBoMon')}" th:errors="*{idBoMon}"></div>
+          </div>
+
+          <!-- Chuyên ngành -->
+          <div class="mb-3">
+            <label class="form-label">Chuyên ngành</label><span style="color: red">*</span>
+            <select style="font-size: 14px" class="form-select" th:field="*{idChuyenNganh}">
+              <option value="">Chọn chuyên ngành</option>
+              <option style="font-size: 14px" th:each="cn : ${listCn}" th:value="${cn.id}" th:text="${cn.tenChuyenNganh}"></option>
+            </select>
+            <div class="errors text-danger" th:if="${#fields.hasErrors('idChuyenNganh')}" th:errors="*{idChuyenNganh}"></div>
+          </div>
+
+          <!-- Loại dự án -->
+          <div class="mb-3">
+            <label class="form-label">Loại dự án</label><span style="color: red">*</span>
+            <select style="font-size: 14px" class="form-select" th:field="*{idLoaiDuAn}">
+              <option value="">Chọn loại dự án</option>
+              <option style="font-size: 14px" th:each="lda : ${listLda}" th:value="${lda.id}" th:text="${lda.tenLoaiDuAn}"></option>
+            </select>
+            <div class="errors text-danger" th:if="${#fields.hasErrors('idLoaiDuAn')}" th:errors="*{idLoaiDuAn}"></div>
+          </div>
+          <!-- Thành viên tham gia -->
+          <div class="mb-3">
+            <label class="form-label">Chọn thành viên tham gia</label><span style="color: red">*</span>
+            <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+              <div class="form-check" th:each="nd : ${listNd}">
+                <input class="form-check-input" type="checkbox"
+                       th:id="'tv-update-' + ${nd.id}"
+                       th:name="thanhVienIds"
+                       th:value="${nd.id}"
+                       th:checked="${updateDuAn.thanhVienIds != null and #lists.contains(updateDuAn.thanhVienIds, nd.id)}" />
+                <label class="form-check-label" th:for="'tv-update-' + ${nd.id}"
+                       th:text="${nd.emailPt + (nd.idVaiTro != null ? ' (' + nd.idVaiTro.tenVaiTro + ')' : '')}"></label>
+              </div>
+            </div>
+          </div>
+          <span style="color: gray;font-size: 12px">Có thể chọn nhiều thành viên *</span>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <a th:href="@{/admin/du-an}" class="btn btn-outline-dark">Hủy</a>
+        <button type="submit" form="updateDuAnForm" class="btn btn-secondary" th:disabled="${updateDuAn == null}">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--modal thêm-->
+<div class="modal fade" id="addDuAnModal" tabindex="-1" aria-labelledby="addDuAnModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-lg">
+      <div class="modal-header">
+        <h5 class="modal-title">Thêm dự án mới</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                onclick="window.location.href='/admin/du-an'"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addDuAnForm" th:action="@{/admin/du-an/them-moi}" method="post" th:object="${newDuAn}">
+          <!-- Tên dự án -->
+          <div class="mb-3">
+            <label class="form-label">Tên dự án</label><span style="color: red">*</span>
+            <input type="text" class="form-control" th:field="*{tenDuAn}" placeholder="Nhập tên dự án">
+            <div class="errors text-danger" th:if="${#fields.hasErrors('tenDuAn')}" th:errors="*{tenDuAn}"></div>
+          </div>
+
+          <!-- Ngày bắt đầu -->
+          <div class="mb-3">
+            <label class="form-label">Ngày bắt đầu</label><span style="color: red">*</span>
+            <input type="date" class="form-control" th:field="*{ngayBatDau}">
+            <div class="errors text-danger" th:if="${#fields.hasErrors('ngayBatDau')}" th:errors="*{ngayBatDau}"></div>
+          </div>
+
+          <!-- Ngày kết thúc -->
+          <div class="mb-3">
+            <label class="form-label">Ngày kết thúc</label><span style="color: red">*</span>
+            <input type="date" class="form-control" th:field="*{ngayKetThucDuKien}">
+            <div class="errors text-danger" th:if="${#fields.hasErrors('ngayKetThucDuKien')}" th:errors="*{ngayKetThucDuKien}"></div>
+          </div>
+
+          <!-- Cơ sở -->
+          <div class="mb-3">
+            <label class="form-label">Cơ sở</label><span style="color: red">*</span>
+            <select style="font-size: 14px" class="form-select" th:field="*{idCoSo}">
+              <option value="">Chọn cơ sở</option>
+              <option style="font-size: 14px" th:each="cs : ${listCs}" th:value="${cs.id}" th:text="${cs.tenCoSo}"></option>
+            </select>
+            <div class="errors text-danger" th:if="${#fields.hasErrors('idCoSo')}" th:errors="*{idCoSo}"></div>
+          </div>
+
+          <!-- Bộ môn -->
+          <div class="mb-3">
+            <label class="form-label">Bộ môn</label><span style="color: red">*</span>
+            <select style="font-size: 14px" class="form-select" th:field="*{idBoMon}">
+              <option value="">Chọn bộ môn</option>
+              <option style="font-size: 14px" th:each="bm : ${listBm}" th:value="${bm.id}" th:text="${bm.tenBoMon}"></option>
+            </select>
+            <div class="errors text-danger" th:if="${#fields.hasErrors('idBoMon')}" th:errors="*{idBoMon}"></div>
+          </div>
+
+          <!-- Chuyên ngành -->
+          <div class="mb-3">
+            <label class="form-label">Chuyên ngành</label><span style="color: red">*</span>
+            <select style="font-size: 14px" class="form-select" th:field="*{idChuyenNganh}">
+              <option value="">Chọn chuyên ngành</option>
+              <option style="font-size: 14px" th:each="cn : ${listCn}" th:value="${cn.id}" th:text="${cn.tenChuyenNganh}"></option>
+            </select>
+            <div class="errors text-danger" th:if="${#fields.hasErrors('idChuyenNganh')}" th:errors="*{idChuyenNganh}"></div>
+          </div>
+
+          <!-- Loại dự án -->
+          <div class="mb-3">
+            <label class="form-label">Loại dự án</label><span style="color: red">*</span>
+            <select style="font-size: 14px" class="form-select" th:field="*{idLoaiDuAn}">
+              <option value="">Chọn loại dự án</option>
+              <option style="font-size: 14px" th:each="lda : ${listLda}" th:value="${lda.id}" th:text="${lda.tenLoaiDuAn}"></option>
+            </select>
+            <div class="errors text-danger" th:if="${#fields.hasErrors('idLoaiDuAn')}" th:errors="*{idLoaiDuAn}"></div>
+          </div>
+
+          <!-- Thành viên -->
+          <div class="mb-3">
+            <label class="form-label">Chọn thành viên tham gia</label><span style="color: red">*</span>
+            <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+              <div class="form-check" th:each="nd : ${listNd}">
+                <input class="form-check-input" type="checkbox"
+                       th:id="'nd-' + ${nd.id}"
+                       th:name="thanhVienIds"
+                       th:value="${nd.id}">
+                <label class="form-check-label" th:for="'nd-' + ${nd.id}"
+                       th:text="${nd.emailPt + (nd.idVaiTro != null ? ' (' + nd.idVaiTro.tenVaiTro + ')' : '')}"></label>
+              </div>
+            </div>
+            <span style="color: gray;font-size: 12px">Có thể chọn nhiều thành viên *</span>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <a th:href="@{/admin/du-an}" class="btn btn-outline-dark">Hủy</a>
+        <button type="submit" form="addDuAnForm" class="btn btn-secondary">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- modal thông báo-->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+  <div id="successToast" class="toast align-items-center text-white border-0" role="alert"
+       aria-live="assertive" aria-atomic="true" th:if="${success}"
+       style="background-color: #80dc80;">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+              aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+
+<!--lỗi file-->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+  <div style="background-color: #f8d7da; color: #721c24;" id="errorToast" class="toast align-items-center border-0"
+       role="alert" aria-live="assertive" aria-atomic="true" th:if="${error}">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}">Lỗi khi nhập file!</span>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+              aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!--mo form add-->
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  document.addEventListener('DOMContentLoaded', function () {
+    const showAddModal = /*[[${showModal}]]*/ false;
+    if (showAddModal) {
+      const modal = new bootstrap.Modal(document.getElementById('addDuAnModal'));
+      modal.show();
+    }
+  });
+  /*]]>*/
+</script>
+
+<!--mo form update-->
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  document.addEventListener('DOMContentLoaded', function () {
+    const showUpdate = /*[[${showUpdateModal}]]*/ false;
+    if (showUpdate) {
+      const updateModal = new bootstrap.Modal(document.getElementById('updateDuAnModal'));
+      updateModal.show();
+    }
+  });
+  /*]]>*/
+</script>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const errorToastEl = document.getElementById('errorToast');
+    if (errorToastEl) {
+      const toast = new bootstrap.Toast(errorToastEl, { delay: 3000 });
+      toast.show();
+    }
+
+    const successToastEl = document.getElementById('successToast');
+    if (successToastEl) {
+      const toast = new bootstrap.Toast(successToastEl, { delay: 2000 });
+      toast.show();
+    }
+
+    const addInputs = document.querySelectorAll('#addDuAnForm input, #addDuAnForm select');
+    addInputs.forEach(input => {
+      input.addEventListener('input', () => {
+        const errorDiv = input.closest('.mb-3').querySelector('.errors');
+        if (errorDiv) {
+          errorDiv.style.display = 'none';
+        }
+      });
+      input.addEventListener('change', () => {
+        const errorDiv = input.closest('.mb-3').querySelector('.errors');
+        if (errorDiv) {
+          errorDiv.style.display = 'none';
+        }
+      });
+    });
+
+    const updateInputs = document.querySelectorAll('#updateDuAnForm input, #updateDuAnForm select');
+    updateInputs.forEach(input => {
+      input.addEventListener('input', () => {
+        const errorDiv = input.closest('.mb-3').querySelector('.errors');
+        if (errorDiv) {
+          errorDiv.style.display = 'none';
+        }
+      });
+      input.addEventListener('change', () => {
+        const errorDiv = input.closest('.mb-3').querySelector('.errors');
+        if (errorDiv) {
+          errorDiv.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

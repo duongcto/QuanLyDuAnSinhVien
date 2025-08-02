@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý báo cáo tuần</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+<div class="container-fluid">
+    <main class="content p-4">
+        <section class="bg-white p-3 rounded shadow-lg filter">
+            <div class="filter-header">
+                <i class="fas fa-filter me-2"></i>
+                <span>Bộ lọc</span>
+            </div>
+            <div class="filter-controls">
+                <div class="d-flex align-items-center gap-2">
+                    <input id="ngayBaoCaoFilter" class="date-input-placeholder form-control"
+                           placeholder="Chọn ngày báo cáo" style="width: 250px;" type="date">
+                    <button id="resetFilterBtn" class="btn btn-outline-secondary" title="Làm mới bộ lọc">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white p-3 rounded shadow-lg mt-3">
+            <div class="table-responsive rounded">
+                <table class="table mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th class="text-center" style="width: 15%;">STT</th>
+                        <th class="text-center" style="width: 40%;">Báo cáo</th>
+                        <th class="text-center" style="width: 20%;">Thời gian</th>
+                        <th class="text-center" style="width: 25%;">Trạng thái</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="baoCao, stat : ${baoCaoPage.content}">
+                        <td class="text-center" th:text="${stat.index + 1 + baoCaoPage.number * baoCaoPage.size}"></td>
+                        <td>
+                            <div><b>Hôm nay:</b> <span th:text="${baoCao.homNayLamGi ?: 'Không có'}"></span></div>
+                            <div><b>Khó khăn:</b> <span th:text="${baoCao.gapKhoKhanGi ?: 'Không có'}"></span></div>
+                            <div><b>Kế hoạch:</b> <span th:text="${baoCao.ngayMaiLamGi ?: 'Không có'}"></span></div>
+                        </td>
+                        <td class="text-center" th:text="${baoCao.ngayBaoCaoFormatted}"></td>
+                        <td class="text-center">
+                            <span th:if="${baoCao.trangThai == true}" class="badge bg-success">Đã nộp</span>
+                            <span th:if="${baoCao.trangThai != true}" class="badge bg-secondary">Chưa nộp</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <nav aria-label="Page navigation" class="mt-3" th:if="${baoCaoPage.totalPages > 1}">
+                <ul class="pagination justify-content-end">
+                    <li class="page-item" th:classappend="${baoCaoPage.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/thanhVien/baoCao(page=${baoCaoPage.number - 1})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(
+                (baoCaoPage.number > 0) ? baoCaoPage.number - 1 : 0,
+                (baoCaoPage.number + 1 < baoCaoPage.totalPages) ? baoCaoPage.number + 1 : baoCaoPage.totalPages - 1)}"
+                        th:classappend="${i == baoCaoPage.number} ? 'active'">
+                        <a class="page-link" th:href="@{/thanhVien/baoCao(page=${i})}" th:text="${i + 1}"></a>
+                    </li>
+
+                    <li class="page-item" th:classappend="${baoCaoPage.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/thanhVien/baoCao(page=${baoCaoPage.number + 1})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </section>
+
+        <section class="bg-white p-3 rounded shadow-lg mt-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="btn-group" role="group" aria-label="Điều hướng tuần">
+                    <button type="button" class="btn btn-dark" onclick="changeWeek(-1)">&#x2329;</button>
+                    <button type="button" class="btn btn-dark" onclick="changeWeek(+1)">&#x232A;</button>
+                </div>
+                <button class="btn btn-secondary ms-3" onclick="goToToday()">Hôm nay</button>
+                <div id="weekTitle" class="fw-bold fs-5 text-center flex-grow-1"></div>
+                <div>
+                    <button id="weekViewBtn" class="btn btn-dark">Tuần</button>
+                    <button id="monthViewBtn" class="btn btn-dark">Tháng</button>
+                </div>
+            </div>
+            <div id="calendar-grid" class="border">
+            </div>
+        </section>
+    </main>
+</div>
+
+<div id="overlay"></div>
+
+<div id="popup">
+    <form id="popupForm" class="needs-validation" action="/thanhVien/baoCao/them" method="POST" novalidate onsubmit="handleSubmit(event)">
+        <h4 id="popupTitle">Báo cáo ngày:</h4>
+
+        <input type="hidden" id="hiddenNgayBaoCao" name="ngayBaoCao">
+
+        <div class="mb-3">
+            <label for="inputCongViec" class="form-label">Hôm nay bạn đã làm gì?</label>
+            <textarea id="inputCongViec" name="homNayLamGi" class="form-control" placeholder="Nhập nội dung..." required></textarea>
+            <div class="invalid-feedback">Vui lòng nhập công việc đã làm.</div>
+        </div>
+        <div class="mb-3">
+            <label for="inputKhoKhan" class="form-label">Bạn gặp khó khăn gì?</label>
+            <textarea id="inputKhoKhan" name="gapKhoKhanGi" class="form-control" placeholder="Nhập nội dung..." required></textarea>
+            <div class="invalid-feedback">Vui lòng nhập khó khăn gặp phải.</div>
+        </div>
+        <div class="mb-3">
+            <label for="inputKeHoach" class="form-label">Kế hoạch ngày mai?</label>
+            <textarea id="inputKeHoach" name="ngayMaiLamGi" class="form-control" placeholder="Nhập nội dung..." required></textarea>
+            <div class="invalid-feedback">Vui lòng nhập kế hoạch cho ngày mai.</div>
+        </div>
+
+        <div class="text-end mt-3">
+            <button class="btn btn-secondary" type="button" onclick="closePopup()">Hủy</button>
+            <button class="btn btn-primary" type="submit">Gửi</button>
+        </div>
+    </form>
+</div>
+
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+    <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-primary text-white">
+            <strong class="me-auto"><i class="fas fa-bell me-2"></i>Thông báo</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function convertDDMMYYYYtoISO(str) {
+        const [day, month, year] = str.split('/');
+        return `${year}-${month}-${day}`;
+    }
+
+    let currentDate = new Date();
+    let selectedDate = null;
+    const todayActual = new Date();
+    let currentView = 'week';
+
+    function renderWeek() {
+        currentView = 'week';
+        const calendarGrid = document.getElementById('calendar-grid');
+        const weekTitleEl = document.getElementById('weekTitle');
+
+        document.getElementById('weekViewBtn').classList.replace('btn-dark', 'btn-dark');
+        document.getElementById('monthViewBtn').classList.replace('btn-dark', 'btn-dark');
+
+        calendarGrid.className = 'border';
+        calendarGrid.style.display = 'grid';
+        calendarGrid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+        calendarGrid.innerHTML = '';
+
+        let startOfWeek = new Date(currentDate);
+        startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+        let endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+        const monthNames = ["thg 1", "thg 2", "thg 3", "thg 4", "thg 5", "thg 6", "thg 7", "thg 8", "thg 9", "thg 10", "thg 11", "thg 12"];
+        const startMonth = monthNames[startOfWeek.getMonth()];
+        const endMonth = monthNames[endOfWeek.getMonth()];
+        let titleText;
+        if (startOfWeek.getMonth() === endOfWeek.getMonth()) {
+            titleText = `${startOfWeek.getDate()} – ${endOfWeek.getDate()} ${startMonth}, ${endOfWeek.getFullYear()}`;
+        } else {
+            titleText = `${startOfWeek.getDate()} ${startMonth} – ${endOfWeek.getDate()} ${endMonth}, ${endOfWeek.getFullYear()}`;
+        }
+        weekTitleEl.textContent = titleText;
+
+        const weekdays = ['CN', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7'];
+
+        const dayElements = [];
+        const reportElements = [];
+
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(startOfWeek);
+            day.setDate(startOfWeek.getDate() + i);
+            const dayString = day.toDateString();
+
+            const dayCell = document.createElement('div');
+            dayCell.className = 'text-center p-2 week-day-cell border-bottom';
+            if (i < 6) dayCell.classList.add('border-end');
+
+            if (dayString === todayActual.toDateString()) {
+                dayCell.classList.add('bg-warning', 'bg-opacity-10');
+            }
+
+            if (selectedDate && dayString === selectedDate.toDateString()) {
+                dayCell.classList.add('selected-day');
+            }
+
+            dayCell.innerHTML = `<div class="fw-bold">${weekdays[i]} ${day.getDate()}/${day.getMonth() + 1}</div>`;
+            dayElements.push(dayCell);
+
+            const reportCell = document.createElement('div');
+            reportCell.className = 'text-center p-2 report-cell';
+            if (i < 6) reportCell.classList.add('border-end');
+
+            if (dayString === todayActual.toDateString()) {
+                reportCell.classList.add('bg-warning', 'bg-opacity-10');
+                reportCell.style.cursor = 'pointer';
+
+                reportCell.onclick = () => {
+                    selectedDate = day;
+
+                    document.querySelectorAll('.week-day-cell.selected-day').forEach(el => el.classList.remove('selected-day'));
+
+                    const allDayCells = document.querySelectorAll('.week-day-cell');
+                    const targetDateStr = `${day.getDate()}/${day.getMonth() + 1}`;
+
+                    allDayCells.forEach(dayCellEl => {
+                        if (dayCellEl.textContent.includes(targetDateStr)) {
+                            dayCellEl.classList.add('selected-day');
+                        }
+                    });
+
+                    const dayStr = `${day.getDate().toString().padStart(2, '0')}/${(day.getMonth()+1).toString().padStart(2,'0')}/${day.getFullYear()}`;
+
+                    const ngayISO = convertDDMMYYYYtoISO(dayStr);
+
+                    const hiddenNgayInput = document.getElementById("hiddenNgayBaoCao");
+                    if (hiddenNgayInput) {
+                        hiddenNgayInput.value = ngayISO;
+                    }
+
+                    openPopup(ngayISO);
+                };
+            } else {
+                reportCell.classList.add('disabled');
+                reportCell.style.cursor = 'default';
+                reportCell.onclick = () => showToast("Bạn chỉ có thể báo cáo cho ngày hiện tại.", "warning");
+            }
+
+            reportCell.innerHTML = `&nbsp;`;
+            reportElements.push(reportCell);
+        }
+
+        [...dayElements, ...reportElements].forEach(cell => calendarGrid.appendChild(cell));
+    }
+
+    function renderMonth() {
+        currentView = 'month';
+        const calendarGrid = document.getElementById('calendar-grid');
+        const weekTitleEl = document.getElementById('weekTitle');
+
+        calendarGrid.className = 'border'; // Reset classes
+        calendarGrid.style.display = 'grid';
+        calendarGrid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+        calendarGrid.innerHTML = ''; // Clear previous content
+
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const firstDayOfMonth = new Date(year, month, 1);
+        const startingDayOfWeek = firstDayOfMonth.getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const monthNamesFull = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+        weekTitleEl.textContent = `${monthNamesFull[month]} ${year}`;
+        const weekdaysShort = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+
+        weekdaysShort.forEach((dayName, index) => {
+            const header = document.createElement('div');
+            header.className = 'text-center fw-bold p-2 border-bottom';
+            if (index < 6) header.classList.add('border-end');
+            header.textContent = dayName;
+            calendarGrid.appendChild(header);
+        });
+
+        let firstDayToRender = new Date(firstDayOfMonth);
+        firstDayToRender.setDate(firstDayOfMonth.getDate() - startingDayOfWeek);
+        const totalCells = Math.ceil((startingDayOfWeek + daysInMonth) / 7) * 7;
+
+        for (let i = 0; i < totalCells; i++) {
+            const day = new Date(firstDayToRender);
+            day.setDate(firstDayToRender.getDate() + i);
+            const dayString = day.toDateString();
+
+            const col = document.createElement('div');
+            col.className = 'p-2 calendar-day d-flex justify-content-end';
+            col.style.minHeight = '80px';
+
+            const dayIndexInGrid = i % 7;
+            if (dayIndexInGrid < 6) col.classList.add('border-end');
+            if (i < totalCells - 7) col.classList.add('border-bottom');
+
+            const isCurrentMonth = day.getMonth() === month;
+
+            if (isCurrentMonth) {
+                col.innerHTML = `<div class="fw-bold">${day.getDate()}</div>`;
+
+                if (selectedDate && dayString === selectedDate.toDateString()) {
+                    col.classList.add('selected-day');
+                }
+
+                if (dayString === todayActual.toDateString()) {
+                    col.classList.add('bg-warning', 'bg-opacity-10');
+                    col.style.cursor = 'pointer';
+                    col.onclick = () => {
+                        selectedDate = day;
+                        document.querySelectorAll('.selected-day').forEach(el => el.classList.remove('selected-day'));
+                        col.classList.add('selected-day');
+
+                        const dayStr = `${day.getDate().toString().padStart(2, '0')}/${(day.getMonth() + 1).toString().padStart(2, '0')}/${day.getFullYear()}`;
+
+                        const ngayISO = convertDDMMYYYYtoISO(dayStr);
+                        openPopup(ngayISO);
+                    };
+                } else {
+                    col.style.cursor = 'default';
+                    col.onclick = () => showToast("Bạn chỉ có thể báo cáo cho ngày hiện tại.", "warning");
+                }
+            } else {
+                col.classList.add('bg-light');
+            }
+            calendarGrid.appendChild(col);
+        }
+    }
+
+    function showToast(message, type = 'info') {
+        const toastEl = document.getElementById('notificationToast');
+        const toastBody = toastEl.querySelector('.toast-body');
+        const toastHeader = toastEl.querySelector('.toast-header');
+
+        toastHeader.className = 'toast-header text-white';
+        toastHeader.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'bg-primary', 'text-dark');
+
+        switch (type) {
+            case 'success':
+                toastHeader.classList.add('bg-success');
+                break;
+            case 'error':
+                toastHeader.classList.add('bg-danger');
+                break;
+            case 'warning':
+                toastHeader.classList.add('bg-warning', 'text-dark');
+                break;
+            default:
+                toastHeader.classList.add('bg-primary');
+        }
+
+        toastBody.textContent = message;
+
+        const toast = new bootstrap.Toast(toastEl, {
+            delay: 3000
+        });
+        toast.show();
+    }
+
+    async function openPopup(ngayISO) {
+        try {
+            const response = await fetch(`/thanhVien/baoCao/xem-json?ngay=${ngayISO}`);
+            const data = response.status === 200 ? await response.json().catch(e => null) : null;
+
+            const congViecInput = document.getElementById('inputCongViec');
+            const khoKhanInput = document.getElementById('inputKhoKhan');
+            const keHoachInput = document.getElementById('inputKeHoach');
+            const submitBtn = document.querySelector('#popupForm button[type="submit"]');
+            const popupTitle = document.getElementById("popupTitle");
+            const hiddenNgay = document.getElementById("hiddenNgayBaoCao");
+
+            hiddenNgay.value = ngayISO;
+            hiddenNgay.dataset.mode = data && data.id ? 'edit' : 'create'; // thêm thuộc tính mode
+
+            if (data && data.id) {
+                popupTitle.innerText = `Cập nhật báo cáo ngày: ${ngayISO.split('-').reverse().join('/')}`;
+                congViecInput.value = data.homNayLamGi || "";
+                khoKhanInput.value = data.gapKhoKhanGi || "";
+                keHoachInput.value = data.ngayMaiLamGi || "";
+
+                congViecInput.readOnly = false;
+                khoKhanInput.readOnly = false;
+                keHoachInput.readOnly = false;
+                submitBtn.style.display = 'inline-block';
+
+                submitBtn.dataset.id = data.id;
+            } else {
+                popupTitle.innerText = `Báo cáo cho ngày: ${ngayISO.split('-').reverse().join('/')}`;
+                congViecInput.value = "";
+                khoKhanInput.value = "";
+                keHoachInput.value = "";
+
+                congViecInput.readOnly = false;
+                khoKhanInput.readOnly = false;
+                keHoachInput.readOnly = false;
+                submitBtn.style.display = 'inline-block';
+
+                submitBtn.removeAttribute('data-id');
+            }
+
+            document.getElementById("popup").style.display = "block";
+            document.getElementById("overlay").style.display = "block";
+
+        } catch (error) {
+            console.error("Lỗi khi lấy báo cáo:", error);
+            showToast("Không thể tải dữ liệu báo cáo.");
+        }
+    }
+
+    function closePopup() {
+        document.querySelectorAll('.selected-day').forEach(el => el.classList.remove('selected-day'));
+        selectedDate = null;
+        const form = document.getElementById('popupForm');
+        form.classList.remove('was-validated');
+        form.reset();
+
+        document.getElementById("popup").style.display = "none";
+        document.getElementById("overlay").style.display = "none";
+    }
+
+    function handleSubmit(event) {
+        event.preventDefault();
+
+        const form = document.getElementById("popupForm");
+        const hiddenNgay = document.getElementById("hiddenNgayBaoCao");
+        const mode = hiddenNgay.dataset.mode;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const id = submitBtn.dataset.id;
+
+        if (mode === "edit" && id) {
+            form.action = `/thanhVien/baoCao/capNhat/${id}`;
+        } else {
+            form.action = `/thanhVien/baoCao/them`;
+        }
+
+        form.submit();
+    }
+
+    function changeWeek(offset) {
+        if (currentView === 'week') {
+            currentDate.setDate(currentDate.getDate() + (offset * 7));
+            renderWeek();
+        } else {
+            currentDate.setMonth(currentDate.getMonth() + offset);
+            renderMonth();
+        }
+    }
+
+    function goToToday() {
+        currentDate = new Date(todayActual);
+        if (currentView === 'week') {
+            renderWeek();
+        } else {
+            renderMonth();
+        }
+    }
+
+    function filterReports() {
+        const dateFilterInput = document.getElementById('ngayBaoCaoFilter');
+        const filterValue = dateFilterInput.value;
+        const reportTableBody = document.querySelector('.table tbody');
+        const rows = reportTableBody.querySelectorAll('tr');
+
+        let formattedFilterDate = '';
+        if (filterValue) {
+            const [year, month, day] = filterValue.split('-');
+            formattedFilterDate = `${day}/${month}/${year}`;
+        }
+
+        rows.forEach(row => {
+            const dateCell = row.cells[2];
+            if (dateCell) {
+                const rowDate = dateCell.textContent.trim();
+                if (!formattedFilterDate || rowDate === formattedFilterDate) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        renderWeek();
+
+        const dateFilterInput = document.getElementById('ngayBaoCaoFilter');
+        const resetFilterBtn = document.getElementById('resetFilterBtn');
+
+        if (dateFilterInput && resetFilterBtn) {
+            const handleFilterChange = () => {
+                dateFilterInput.classList.toggle('empty', !dateFilterInput.value);
+                filterReports();
+            };
+            dateFilterInput.addEventListener('change', handleFilterChange);
+
+            resetFilterBtn.addEventListener('click', function () {
+                dateFilterInput.value = '';
+                dateFilterInput.dispatchEvent(new Event('change'));
+            });
+            handleFilterChange();
+        }
+
+        document.getElementById('weekViewBtn').addEventListener('click', renderWeek);
+        document.getElementById('monthViewBtn').addEventListener('click', renderMonth);
+        const popupForm = document.getElementById('popupForm');
+        if (popupForm) {
+            popupForm.addEventListener('submit', function (event) {
+                if (!popupForm.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                popupForm.classList.add('was-validated');
+            }, false);
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const message = /*[[${message}]]*/ null;
+    const error = /*[[${error}]]*/ null;
+
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+    });
+
+    if (message !== null) {
+        Toast.fire({
+            icon: 'success',
+            title: message
+        });
+    }
+
+    if (error !== null) {
+        Toast.fire({
+            icon: 'error',
+            title: error
+        });
+    }
+    /*]]>*/
+</script>
+
+</body>
+
+</html>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+    }
+
+    .container-fluid {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+    }
+
+    .content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        height: 100vh;
+    }
+
+    .filter {
+        background: #f6f6fb;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .filter-header {
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        margin-bottom: 15px;
+        font-size: 16px;
+        color: #0c5460;
+        /* Màu chữ xanh đậm */
+        background-color: #d1ecf1;
+        /* Nền xanh nhạt */
+        padding: 12px 15px;
+        border-radius: 6px;
+    }
+
+    .filter-header i {
+        margin-right: 8px;
+        font-size: 18px;
+    }
+
+    .filter-controls {
+        padding: 20px 0;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .form-group label {
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        background: white;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    table th,
+    table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    #popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        padding: 30px 40px;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        z-index: 999;
+        width: 600px;
+        max-width: 90%;
+        min-height: 450px;
+        overflow-y: auto;
+    }
+
+    #popup h3 {
+        margin-top: 0;
+        margin-bottom: 20px;
+    }
+
+    #popup .form-group {
+        margin-bottom: 15px;
+    }
+
+    #popup .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    #popup .form-group input,
+    #popup .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        background: white;
+        font-size: 14px;
+    }
+
+    #popup>div:last-child {
+        margin-top: 25px;
+        text-align: right;
+    }
+
+    #popup button {
+        padding: 10px 18px;
+        margin-left: 10px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .error-message {
+        color: red;
+        font-size: 0.85em;
+        margin-top: 4px;
+    }
+
+    .date-input-placeholder {
+        position: relative;
+    }
+
+    .date-input-placeholder.empty {
+        color: transparent;
+    }
+
+    .date-input-placeholder.empty::before {
+        content: attr(placeholder);
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        pointer-events: none;
+    }
+
+    #popup,
+    #overlay {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    #overlay {
+        display: none;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+    }
+
+    #popup {
+        display: none;
+        background: white;
+        z-index: 999;
+        padding: 30px;
+        border-radius: 10px;
+        min-width: 400px;
+    }
+
+    .error-message {
+        color: red;
+        font-size: 0.85rem;
+        margin-top: 4px;
+    }
+
+    .report-cell {
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .report-cell:hover {
+        background-color: #e9ecef;
+    }
+
+    .report-cell.disabled {
+        cursor: not-allowed;
+    }
+
+    .report-cell.disabled:hover {
+        background-color: inherit;
+    }
+
+    .selected-day {
+        box-shadow: 0 0 0 2px var(--bs-primary) inset;
+        position: relative;
+        z-index: 1;
+    }
+</style> 

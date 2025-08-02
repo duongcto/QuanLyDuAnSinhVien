@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Code giao diện</title>
+  <style>
+    .formCongViecChiTiet {
+      /* Các thuộc tính đã có */
+      display: flex;
+      width: 820px;
+      gap: 20px;
+      padding: 20px;
+      background: #f4f5f7;
+      font-family: sans-serif;
+
+      /* Thêm những dòng này để căn giữa */
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .main-content, .sidebar {
+      background: #fff; padding: 20px; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .main-content { flex-grow: 1; }
+    .sidebar { width: 250px; }
+    h3 { margin-top: 0; color: #5e6c84; display: flex; align-items: center; gap: 8px; }
+    button { border: 1px dashed #ccc; background: #f4f5f7; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-right: 5px; }
+    .priority-group { display: flex; align-items: center; gap: 5px; }
+    .priority-group .current-priority { background: #dfe1e6; padding: 5px 10px; border-radius: 3px; }
+    textarea { width: 100%; min-height: 60px; border: 1px solid #ccc; border-radius: 3px; padding: 8px; box-sizing: border-box; }
+    .progress-bar-container { background: #dfe1e6; border-radius: 3px; height: 8px; margin-bottom: 10px; overflow: hidden; }
+    .progress-bar { background: #0079bf; height: 100%; width: 0; }
+    .add-button { background: #0079bf; color: #fff; border: none; padding: 8px 15px; border-radius: 3px; cursor: pointer; }
+    .add-button:hover { background: #0052cc; }
+    .sidebar-item { display: flex; align-items: center; padding: 8px 12px; margin-bottom: 8px; background: #f4f5f7; border-radius: 3px; cursor: pointer; }
+    .sidebar-item:hover { background: #e1e4e8; }
+    .comment-box { display: flex; gap: 10px; align-items: flex-start; }
+    .avatar { width: 32px; height: 32px; background: #ccc; border-radius: 50%; }
+    .comment-input { flex-grow: 1; position: relative; }
+    .send-icon { position: absolute; right: 10px; bottom: 10px; cursor: pointer; color: #5e6c84; }
+    .toggle-details { color: #5e6c84; cursor: pointer; font-size: 0.9em; }
+    .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #5e6c84; }
+    .close-btn { cursor: pointer; font-size: 1.2em; }
+  </style>
+</head>
+<body>
+
+<div class="formCongViecChiTiet" style="display:none;">
+  <div class="main-content">
+    <h1>Code giao diện</h1>
+
+    <div style="display:flex; gap:20px; align-items:center; margin-bottom:20px;">
+      <div>
+        <button><span class="icon">+</span> Nhãn</button>
+        <button><span class="icon">+</span> Thành viên</button>
+      </div>
+      <div class="priority-group">
+        <span>Độ ưu tiên:</span>
+        <span class="current-priority">Thấp</span>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3><span class="icon">📄</span> Mô tả</h3>
+      <textarea placeholder="Thêm mô tả..."></textarea>
+    </div>
+
+    <div class="form-section">
+      <h3><span class="icon">☑️</span> Những việc cần làm</h3>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <span>0%</span>
+        <div class="progress-bar-container" style="flex-grow:1;">
+          <div class="progress-bar"></div>
+        </div>
+      </div>
+      <button class="add-button">+ Thêm</button>
+    </div>
+
+    <div class="form-section">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3><span class="icon">💬</span> Bình luận</h3>
+        <span class="toggle-details">Hiển thị Chi tiết</span>
+      </div>
+      <div class="comment-box">
+        <div class="avatar"></div>
+        <div class="comment-input">
+          <textarea placeholder="Viết bình luận... nhập @ để nhắc tới ai đó"></textarea>
+          <span class="send-icon">➢</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3><span class="icon">⏱️</span> Hoạt động</h3>
+        <span class="toggle-details">Xem đầy đủ</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h4>Thêm vào thẻ</h4>
+      <span class="close-btn">×</span>
+    </div>
+    <ul>
+      <li class="sidebar-item"><span class="icon">👤</span> Thành viên</li>
+      <li class="sidebar-item"><span class="icon">🏷️</span> Kiểu công việc</li>
+      <li class="sidebar-item"><span class="icon">🔖</span> Nhãn</li>
+      <li class="sidebar-item"><span class="icon">⭐</span> Độ ưu tiên</li>
+      <li class="sidebar-item"><span class="icon">📅</span> Ngày hạn</li>
+      <li class="sidebar-item"><span class="icon">⤒</span> Tải ảnh lên</li>
+      <li class="sidebar-item"><span class="icon">🔗</span> Link đính kèm</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>
